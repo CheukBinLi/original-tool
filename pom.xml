@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.cheukbinli</groupId>
+    <artifactId>original-tool</artifactId>
+    <!--    <version>${version.prefix}-${version.suffix}</version>-->
+    <version>1.0.0.1-RELEASE</version>
+    <packaging>pom</packaging>
+    <name>original-tool</name>
+    <url>https://github.com/CheukBinLi/original-tool</url>
+    <description>basic tools package</description>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Bin</name>
+            <email>20796698@qq.com</email>
+            <url>https://github.com/CheukBinLi/original-tool</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/CheukBinLi/original.git</connection>
+        <developerConnection>scm:git:git@github.com:CheukBinLi/original-tool.git</developerConnection>
+        <url>https://github.com/CheukBinLi/original-tool</url>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${build.org.apache.maven.plugins.maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>${build.org.apache.maven.plugins.maven-compiler-plugin.source}</source>
+                    <target>${build.org.apache.maven.plugins.maven-compiler-plugin.target}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>${build.org.codehaus.mojo.versions-maven-plugin.version}</version>
+                <configuration>
+                    <generateBackupPoms>false</generateBackupPoms>
+                </configuration>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+            </resource>
+        </resources>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>${plugin.nexus-staging-maven-plugin.nexus-staging-maven-plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${plugin.org.apache.maven.plugins.maven-source-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${plugin.org.apache.maven.plugins.maven-javadoc-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <additionalparam>${plugin.org.apache.maven.plugins.maven-javadoc-plugin.javadoc.opts}
+                            </additionalparam>
+                            <charset>UTF-8</charset>
+                            <locale>zh_CN</locale>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${plugin.org.apache.maven.plugins.maven-gpg-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+
+    <properties>
+        <build.org.apache.maven.plugins.maven-compiler-plugin.version>3.8.1
+        </build.org.apache.maven.plugins.maven-compiler-plugin.version>
+        <build.org.apache.maven.plugins.maven-compiler-plugin.source>1.8
+        </build.org.apache.maven.plugins.maven-compiler-plugin.source>
+        <build.org.apache.maven.plugins.maven-compiler-plugin.target>1.8
+        </build.org.apache.maven.plugins.maven-compiler-plugin.target>
+        <build.org.codehaus.mojo.versions-maven-plugin.version>2.7
+        </build.org.codehaus.mojo.versions-maven-plugin.version>
+
+        <plugin.nexus-staging-maven-plugin.nexus-staging-maven-plugin.version>1.6.3
+        </plugin.nexus-staging-maven-plugin.nexus-staging-maven-plugin.version>
+        <plugin.nexus-staging-maven-plugin.serverId.version>ossrh</plugin.nexus-staging-maven-plugin.serverId.version>
+        <plugin.org.apache.maven.plugins.maven-source-plugin.version>2.2.1
+        </plugin.org.apache.maven.plugins.maven-source-plugin.version>
+        <plugin.org.apache.maven.plugins.maven-javadoc-plugin.version>2.9.1
+        </plugin.org.apache.maven.plugins.maven-javadoc-plugin.version>
+        <plugin.org.apache.maven.plugins.maven-javadoc-plugin.javadoc.opts>-Xdoclint:none
+        </plugin.org.apache.maven.plugins.maven-javadoc-plugin.javadoc.opts>
+        <plugin.org.apache.maven.plugins.maven-gpg-plugin.version>1.6
+        </plugin.org.apache.maven.plugins.maven-gpg-plugin.version>
+        <version.prefix>1.0</version.prefix>
+        <version.suffix>release</version.suffix>
+    </properties>
+
+    <modules>
+        <module>original-depend</module>
+        <module>original-common</module>
+        <module>original-cache</module>
+        <module>original-qrcode</module>
+        <module>original-rmi</module>
+    </modules>
+
+</project>
+<!--         版本发布  clean deploy -P release &#45;&#45;settings /usr/local/maven3.6.2/conf/settings.xml-->
+<!--        修改版本  versions:set -DnewVersion=1.0-SNAPSHOT &#45;&#45;settings /usr/local/maven3.6.2/conf/settings.xml-->

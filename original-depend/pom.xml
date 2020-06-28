@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>original-tool</artifactId>
+        <groupId>com.github.cheukbinli</groupId>
+        <version>1.0.0.1-RELEASE</version>
+    </parent>
+    <packaging>pom</packaging>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>original-depend</artifactId>
+
+    <properties>
+        <log4j.log4j.version>1.2.17</log4j.log4j.version>
+        <org.slf4j.slf4j-log4j12.version>1.7.30</org.slf4j.slf4j-log4j12.version>
+        <org.apache.logging.log4j.log4j-to-slf4j.version>2.13.3</org.apache.logging.log4j.log4j-to-slf4j.version>
+        <junit.junit.version>4.13</junit.junit.version>
+
+        <!--rmi-->
+        <org.springframework.version>5.2.7.RELEASE</org.springframework.version>
+        <io.netty.netty-all.version>4.1.50.Final</io.netty.netty-all.version>
+        <org.javassist.javassist.version>3.27.0-GA</org.javassist.javassist.version>
+
+        <!--cache-->
+        <redis.clients.jedis.version>3.3.0</redis.clients.jedis.version>
+        <com.esotericsoftware.kryo.version>5.0.0-RC6</com.esotericsoftware.kryo.version>
+        <de.ruedigermoeller.fst.version>3.0.1</de.ruedigermoeller.fst.version>
+
+
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.junit.version}</version>
+            </dependency>
+            <!--log4j -->
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4j.log4j.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${org.slf4j.slf4j-log4j12.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-to-slf4j</artifactId>
+                <version>${org.apache.logging.log4j.log4j-to-slf4j.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!--rmi-->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${org.springframework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context-support</artifactId>
+                <version>${org.springframework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>${org.javassist.javassist.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${io.netty.netty-all.version}</version>
+            </dependency>
+
+            <!--cache-->
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${redis.clients.jedis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.esotericsoftware</groupId>
+                <artifactId>kryo</artifactId>
+                <version>${com.esotericsoftware.kryo.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>de.ruedigermoeller</groupId>
+                <artifactId>fst</artifactId>
+                <version>${de.ruedigermoeller.fst.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+
+</project>
