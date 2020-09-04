@@ -1,12 +1,11 @@
 package com.github.cheukbinli.original.rmi.net.netty.message;
 
+import com.github.cheukbinli.original.common.rmi.net.MessageCallBack;
+import io.netty.channel.SimpleChannelInboundHandler;
+
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
-
-import com.github.cheukbinli.original.common.rmi.net.MessageCallBack;
-
-import io.netty.channel.SimpleChannelInboundHandler;
 
 /***
  * 客户端消息处理器适配器

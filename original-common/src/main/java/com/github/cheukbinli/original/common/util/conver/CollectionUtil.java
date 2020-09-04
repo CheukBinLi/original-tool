@@ -1,13 +1,12 @@
 package com.github.cheukbinli.original.common.util.conver;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import com.github.cheukbinli.original.common.cache.redis.Script;
+import com.github.cheukbinli.original.common.util.reflection.ClassInfo;
+import com.github.cheukbinli.original.common.util.reflection.FieldInfo;
+import com.github.cheukbinli.original.common.util.reflection.ReflectionUtil;
+
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -128,6 +127,45 @@ public class CollectionUtil {
 			return (Map<K, V>) data;
 		}
 
+	}
+
+	/***
+	 * 从对象里取值转换为map对象
+	 * @param obj
+	 * @param keyUseAliasName
+	 * @param keyNames
+	 * @return
+	 * @throws NoSuchFieldException
+	 * @throws IllegalAccessException
+	 */
+	public static Map createMapByObject(Object obj, boolean keyUseAliasName, String... keyNames) {
+		try {
+			if (null == obj || isEmpty(keyNames))
+				return EMPTY_MAP;
+			ClassInfo classInfo = ClassInfo.getClassInfo(obj.getClass());
+			Map<String, FieldInfo> fields = classInfo.getFields();
+			if (null == fields) {
+				synchronized (classInfo) {
+					fields = classInfo.getFields();
+					if (null == fields) {
+						classInfo.setFields(fields = ReflectionUtil.instance().scanClassFieldInfo4Map(classInfo.getClazz(), true, true, true));
+					}
+				}
+			}
+			Map result = new HashMap(keyNames.length * 2);
+			FieldInfo fieldInfo = null;
+			String key;
+			for (String item : keyNames) {
+				if (null == (fieldInfo = fields.get(item)))
+					continue;
+				result.put(fieldInfo.getAliasOrFieldName(keyUseAliasName), fieldInfo.getField().get(obj));
+			}
+
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return EMPTY_MAP;
 	}
 
 	public static SetBuilder setBuilder(boolean isConcurrent) {
@@ -299,7 +337,7 @@ public class CollectionUtil {
 //
 //	}
 //
-//	public static void main(String[] args) {
+	public static void main(String[] args) {
 //		Map<String, Object> a = toMap(true, new Object[]{1, "1", 2, "2"});
 //		Map<String, Object> b = toMap("1", 1, "2", 2);
 //		System.out.println(a);
@@ -314,6 +352,13 @@ public class CollectionUtil {
 //		for (int i = 0, len = link.size + 1; i < len; i++) {
 //			System.err.println(link.previous());
 //		}
-//	}
+
+		Script aaa=new Script();
+		aaa.setName("993");
+		aaa.setSlotName("slotName");
+		aaa.setScript("hello world");
+		Map aaaMap=createMapByObject(aaa,true,"name","script");
+		System.out.println(aaaMap);
+	}
 
 }

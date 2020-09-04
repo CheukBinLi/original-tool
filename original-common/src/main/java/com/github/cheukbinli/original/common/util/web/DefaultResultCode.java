@@ -1,11 +1,11 @@
 package com.github.cheukbinli.original.common.util.web;
 
+import com.github.cheukbinli.original.common.util.conver.StringUtil;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.github.cheukbinli.original.common.util.conver.StringUtil;
 
 public interface DefaultResultCode {
 

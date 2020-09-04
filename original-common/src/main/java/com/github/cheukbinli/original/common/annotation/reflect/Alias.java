@@ -1,14 +1,9 @@
 package com.github.cheukbinli.original.common.annotation.reflect;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /***
- * 
+ *
  * @Title: original-common
  * @Description: 字段、方法别名
  * @Company:
@@ -17,7 +12,7 @@ import java.lang.annotation.Target;
  * @date 2017年8月4日 下午11:20:58
  *
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented

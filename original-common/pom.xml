@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.github.cheukbinli</groupId>
         <artifactId>original-tool</artifactId>
-        <version>1.0.0.1-RELEASE</version>
+        <version>1.0.0.2b-RELEASE</version>
     </parent>
     <artifactId>original-common</artifactId>
     <name>original-common</name>
@@ -30,6 +30,10 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>

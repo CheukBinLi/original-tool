@@ -1,5 +1,10 @@
 package com.github.cheukbinli.original.common.util.design.factory;
 
+/***
+ * 策略处理器
+ * @param <T>
+ * @param <Type>
+ */
 public interface HandlerManager<T extends Handler, Type> {
 
 	/***

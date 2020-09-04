@@ -1,14 +1,13 @@
 package com.github.cheukbinli.original.oauth.model;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.github.cheukbinli.original.common.util.conver.StringUtil;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @AllArgsConstructor

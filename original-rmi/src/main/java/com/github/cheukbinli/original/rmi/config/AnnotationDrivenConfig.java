@@ -1,15 +1,14 @@
 package com.github.cheukbinli.original.rmi.config;
 
+import com.github.cheukbinli.original.common.rmi.RmiContant;
 import com.github.cheukbinli.original.rmi.GenerateRmiBeanFactory;
+import com.github.cheukbinli.original.rmi.config.ReferenceGroupConfig.ReferenceGroupModel;
+import com.github.cheukbinli.original.rmi.config.ServiceGroupConfig.ServiceGroupModel;
 import com.github.cheukbinli.original.rmi.config.model.ScanModel;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import com.github.cheukbinli.original.common.rmi.RmiContant;
-import com.github.cheukbinli.original.rmi.config.ReferenceGroupConfig.ReferenceGroupModel;
-import com.github.cheukbinli.original.rmi.config.ServiceGroupConfig.ServiceGroupModel;
 
 public class AnnotationDrivenConfig extends AbstractConfig implements RmiContant {
 

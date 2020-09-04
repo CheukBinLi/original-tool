@@ -1,8 +1,5 @@
 package com.github.cheukbinli.original.oauth.util;
 
-import java.util.Date;
-import java.util.HashSet;
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
@@ -11,6 +8,9 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.github.cheukbinli.original.common.exception.OverdueException;
 import com.github.cheukbinli.original.oauth.model.AuthInfo;
 import com.github.cheukbinli.original.oauth.model.encryption.KeyModel;
+
+import java.util.Date;
+import java.util.HashSet;
 
 public class JWTUtil {
 

@@ -1,12 +1,12 @@
 package com.github.cheukbinli.original.common.dbmanager.dao;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-
 import com.github.cheukbinli.original.common.dbmanager.BaseEntity;
 import com.github.cheukbinli.original.common.dbmanager.DBAdapter;
 import com.github.cheukbinli.original.common.util.GeneratedIDService;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractDao<entity extends BaseEntity, ID extends Serializable> implements BaseDao<entity, ID> {
 

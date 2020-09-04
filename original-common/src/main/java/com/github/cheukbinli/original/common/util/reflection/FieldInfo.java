@@ -1,9 +1,9 @@
 package com.github.cheukbinli.original.common.util.reflection;
 
+import com.github.cheukbinli.original.common.annotation.reflect.Alias;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-
-import com.github.cheukbinli.original.common.annotation.reflect.Alias;
 
 public class FieldInfo {
 

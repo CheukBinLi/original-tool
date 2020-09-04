@@ -1,10 +1,10 @@
 package com.github.cheukbinli.original.common.util.conver;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListMap;
-
 import com.github.cheukbinli.original.common.util.reflection.ClassInfo;
 import com.github.cheukbinli.original.common.util.reflection.ReflectionUtil;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 @Deprecated
 public class ValueReference {

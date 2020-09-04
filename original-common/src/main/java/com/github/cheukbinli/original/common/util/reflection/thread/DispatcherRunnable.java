@@ -1,10 +1,10 @@
 package com.github.cheukbinli.original.common.util.reflection.thread;
 
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 public abstract class DispatcherRunnable<ITEM> implements Runnable {
 

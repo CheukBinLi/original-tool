@@ -1,8 +1,8 @@
 package com.github.cheukbinli.original.common.web.common.controller;
 
-import java.util.Map;
-
 import com.github.cheukbinli.original.common.web.common.ContentType;
+
+import java.util.Map;
 
 /***
  * 

@@ -1,26 +1,15 @@
 package com.github.cheukbinli.original.common.util.reflection;
 
+import com.github.cheukbinli.original.common.annotation.reflect.Alias;
+import com.github.cheukbinli.original.common.util.conver.StringUtil;
+import com.github.cheukbinli.original.common.util.scan.Scan;
+import com.github.cheukbinli.original.common.util.scan.ScanSimple;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.RandomAccess;
-import java.util.Set;
-import java.util.Vector;
-
-import com.github.cheukbinli.original.common.annotation.reflect.Alias;
-import com.github.cheukbinli.original.common.util.scan.Scan;
-import com.github.cheukbinli.original.common.util.scan.ScanSimple;
+import java.util.*;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class ReflectionUtil {
@@ -59,7 +48,7 @@ public class ReflectionUtil {
 
 	/***
 	 * 验证是否是封装类
-	 * 
+	 *
 	 * @param type
 	 * @return
 	 */
@@ -72,7 +61,7 @@ public class ReflectionUtil {
 	}
 
 	/***
-	 * 
+	 *
 	 * @param clazz
 	 * @param isAccessible
 	 * @param hasSetting
@@ -158,6 +147,7 @@ public class ReflectionUtil {
 		classes.add(clazz);
 		Class<?> tempClass;
 		Alias alias = null;// 别名
+		Map<String, Alias> methodAlias = new HashMap<>();
 		Class<?> currentClass = clazz;
 		List<Field> fields = new ArrayList<Field>();
 		List<Method> methods = new ArrayList<Method>();
@@ -179,11 +169,17 @@ public class ReflectionUtil {
 		Map<String, FieldInfo> result = new LinkedHashMap<String, FieldInfo>();
 		Set<String> settingMethodName = null;
 		settingMethodName = new HashSet<String>();
+		String fieldName;
+		FieldInfo fieldInfo;
 		for (Method m : methods) {
 			if (!Modifier.isPublic(m.getModifiers()))
 				continue;
 			if (m.getName().startsWith("set") || m.getName().startsWith("get")) {
-				settingMethodName.add(m.getName().substring(3).toLowerCase());
+				settingMethodName.add((fieldName = m.getName().substring(3)).toLowerCase());
+				alias = m.getAnnotation(Alias.class);
+				if (null == alias)
+					continue;
+				methodAlias.put(StringUtil.toLowerCaseFirstOne(fieldName), alias);
 			} else if (m.getName().startsWith("is")) {
 				settingMethodName.add(m.getName().substring(2).toLowerCase());
 			}
@@ -195,17 +191,19 @@ public class ReflectionUtil {
 				continue;
 			}
 			if (!hasSetting || settingMethodName.contains(f.getName().toLowerCase())) {
-				f.setAccessible(true);
-				if (hasAliasAnnotation) {
-					alias = f.getAnnotation(Alias.class);
-					if (null != alias && alias.value().length() > 0) {
-						result.put(alias.value(), new FieldInfo(f, true));
-					}
-				}
-				if (!hasAliasAnnotation || null == alias || (hasAliasAnnotation && keepBoth)) {
-					result.put(f.getName(), new FieldInfo(f));
-
-				}
+                f.setAccessible(true);
+                fieldInfo = new FieldInfo(f);
+                if (hasAliasAnnotation) {
+                    alias = methodAlias.get(f.getName());
+                    alias = null == alias ? f.getAnnotation(Alias.class) : alias;
+                    if (null != alias && alias.value().length() > 0) {
+                        fieldInfo.setAlias(alias).setAlias(true);
+                        result.put(alias.value(), fieldInfo);
+                    }
+                }
+//				if (!hasAliasAnnotation || null == alias || (hasAliasAnnotation && keepBoth)) {
+                result.put(f.getName(), fieldInfo);
+//				}
 			}
 		}
 		return result;
@@ -341,7 +339,7 @@ public class ReflectionUtil {
 				return result;
 			}
 			result = new ArrayList<Field>();
-			for (Type t : type.getActualTypeArguments())
+			for (java.lang.reflect.Type t : type.getActualTypeArguments())
 				result.addAll(scanClassField4List((Class<?>) t, isAccessible, true, true));
 		}
 		return result;

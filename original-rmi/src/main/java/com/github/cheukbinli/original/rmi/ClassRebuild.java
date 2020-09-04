@@ -5,14 +5,22 @@ import javassist.*;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.annotation.StringMemberValue;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
 public class ClassRebuild {
 
 	private final ClassPool pool = ClassPool.getDefault();
+	private volatile CtClass VOID;
+
 	{
 		pool.insertClassPath(new ClassClassPath(this.getClass()));
+		try {
+			VOID = pool.get(void.class.getName());
+		} catch (NotFoundException e) {
+			VOID = null;
+		}
 	}
 	private final String suffixName = "$proxyClass";
 
@@ -33,6 +41,8 @@ public class ClassRebuild {
 
 		CtClass orginalClass = pool.get(clazz.getName());
 		CtClass newClass = pool.makeClass(orginalClassName);
+        newClass.setModifiers(Modifier.PUBLIC);
+		addCtConstructor(orginalClass, newClass);
 
 		if (isInterface)
 			newClass.addInterface(orginalClass);
@@ -47,8 +57,11 @@ public class ClassRebuild {
 		String temp;
 		String param;
 		for (final CtMethod m : orginalClassMethods) {
+            if (Modifier.isStatic(m.getModifiers()) ||Modifier.isPrivate(m.getModifiers()) || Modifier.isFinal(m.getModifiers()) || Modifier.isNative(m.getModifiers())) {
+                continue;
+            }
 			param = m.getParameterTypes().length > 0 ? "$$" : "";
-			superBody = isInterface ? "" : "super." + m.getName() + "(" + param + ");";
+			superBody = isInterface ? "" : (isVoid(m) ? "" : "return ") + "super." + m.getName() + "(" + param + ");";
 			//			methodString = generateMethod(m, null == modifyMethod ? superBody : "try{ " + modifyMethod.appCodeToBefore(m.getName(), param), (superBody = null == (temp = modifyMethod.overrideSuperMethod(m.getName(), param)) ? superBody : temp) + " }finally{" + modifyMethod.appCodeToAfter(m.getName(), param) + "}");
 			methodString = generateMethod(m, null == modifyMethod ? "" : modifyMethod.appCodeToBefore(m.getName(), param), (superBody = null == (temp = null == modifyMethod ? null : modifyMethod.overrideSuperMethod(m.getName(), param)) ? superBody : temp), null == modifyMethod ? "" : modifyMethod.appCodeToAfter(m.getName(), param));
 			newClass.addMethod(CtNewMethod.make(methodString, newClass));
@@ -170,13 +183,43 @@ public class ClassRebuild {
 	}
 
 	public boolean isVoid(CtMethod method) throws NotFoundException {
-		return "void".equals(method.getReturnType().getSimpleName());
+		if (null == VOID) {
+			synchronized (this) {
+				if (null == VOID) {
+					VOID = pool.get(void.class.getName());
+				}
+			}
+//            return "void".equals(method.getReturnType().getSimpleName());
+		}
+		return VOID.equals(method.getReturnType());
+	}
+
+	public void addCtConstructor(CtClass source, CtClass target) {
+		try {
+			CtConstructor[] constructors = source.getDeclaredConstructors();
+			boolean hasEmpty = false;
+			CtConstructor constructor;
+			for (CtConstructor item : constructors) {
+				constructor = new CtConstructor(item, target, null);
+				if (item.isConstructor()) {
+					hasEmpty = true;
+                    constructor.setBody("super();");
+				}
+				constructor.setModifiers(Modifier.PUBLIC);
+				target.addConstructor(constructor);
+			}
+			if (hasEmpty)
+				return;
+			target.addConstructor(CtNewConstructor.make(String.format("public %s(){}", target.getSimpleName()), target));
+		} catch (CannotCompileException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static interface ModifyMethod {
 
 		/***
-		 * 
+		 *
 		 * @param paramsTag
 		 *            方法体里所有的参数代代替码/$1代表每个参数$2为第二个参数.......
 		 * @return
@@ -191,7 +234,7 @@ public class ClassRebuild {
 		}
 
 		/***
-		 * 
+		 *
 		 * @param paramsTag
 		 *            方法体里所有的参数代代替码/$1代表每个参数$2为第二个参数.......
 		 * @return
@@ -200,6 +243,10 @@ public class ClassRebuild {
 			return "";
 		}
 	}
+
+    public byte[] getCode(Class clazz) throws NotFoundException, IOException, CannotCompileException {
+        return pool.get(clazz.getName()).toBytecode();
+    }
 
 	public static class FieldModel {
 
@@ -294,6 +341,11 @@ public class ClassRebuild {
 			this.createGetting = createGetting;
 			this.createSetting = createSetting;
 		}
+	}
+
+	public static void main(String[] args) throws Throwable {
+		ClassRebuild c=new ClassRebuild();
+		c.build(ClassRebuild.class,null,null,null);
 	}
 
 }

@@ -1,15 +1,13 @@
 package com.github.cheukbinli.original.rmi.net.netty;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.cheukbinli.original.common.cache.CacheSerialize;
 import com.github.cheukbinli.original.common.rmi.RmiContant;
 import com.github.cheukbinli.original.common.rmi.model.TransmissionModel;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NettyMessageEncoder extends MessageToByteEncoder<TransmissionModel> implements RmiContant {
 

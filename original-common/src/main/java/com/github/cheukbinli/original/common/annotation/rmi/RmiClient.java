@@ -1,11 +1,6 @@
 package com.github.cheukbinli.original.common.annotation.rmi;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /***
  * 远程调用客户端注解(接口/实现)

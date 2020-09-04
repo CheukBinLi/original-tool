@@ -1,17 +1,12 @@
 package com.github.cheukbinli.original.common.util;
 
-import java.security.MessageDigest;
-import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import com.github.cheukbinli.original.common.util.conver.StringUtil;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
-import com.github.cheukbinli.original.common.util.conver.StringUtil;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.util.*;
 
 public class SignUtil {
 

@@ -1,11 +1,11 @@
 package com.github.cheukbinli.original.common.dbmanager.service;
 
+import com.github.cheukbinli.original.common.dbmanager.BaseEntity;
+import com.github.cheukbinli.original.common.dbmanager.dao.AbstractDao;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-
-import com.github.cheukbinli.original.common.dbmanager.BaseEntity;
-import com.github.cheukbinli.original.common.dbmanager.dao.AbstractDao;
 
 public abstract class AbstractService2<entity extends BaseEntity, ID extends Serializable> implements BaseService2<entity, ID> {
 

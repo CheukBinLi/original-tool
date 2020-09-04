@@ -4,7 +4,6 @@ import com.github.cheukbinli.original.common.rmi.RmiBeanFactory;
 import com.github.cheukbinli.original.common.rmi.model.MethodBean;
 import com.github.cheukbinli.original.common.rmi.model.TransmissionModel;
 import com.github.cheukbinli.original.common.rmi.net.MessageHandle;
-
 import io.netty.channel.ChannelHandlerContext;
 
 @SuppressWarnings("rawtypes")

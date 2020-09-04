@@ -1,19 +1,17 @@
 package com.github.cheukbinli.original.rmi.net.netty;
 
-import java.net.InetSocketAddress;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.github.cheukbinli.original.common.rmi.RmiInvokeClient;
 import com.github.cheukbinli.original.common.rmi.model.TransmissionModel;
 import com.github.cheukbinli.original.common.rmi.net.NetworkClient;
 import com.github.cheukbinli.original.rmi.config.RmiConfig.RmiConfigGroup;
 import com.github.cheukbinli.original.rmi.net.netty.client.NettyClientHandle;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.net.InetSocketAddress;
 
 /***
  * 远程方法简单实现

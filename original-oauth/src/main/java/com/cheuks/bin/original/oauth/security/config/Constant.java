@@ -5,7 +5,6 @@ import com.github.cheukbinli.original.common.util.conver.StringUtil;
 import com.github.cheukbinli.original.oauth.model.Role;
 import com.github.cheukbinli.original.oauth.model.User;
 import com.github.cheukbinli.original.oauth.model.UserDetail;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

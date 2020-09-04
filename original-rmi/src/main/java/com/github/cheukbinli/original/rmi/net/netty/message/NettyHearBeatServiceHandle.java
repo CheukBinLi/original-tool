@@ -2,7 +2,6 @@ package com.github.cheukbinli.original.rmi.net.netty.message;
 
 import com.github.cheukbinli.original.common.rmi.model.TransmissionModel;
 import com.github.cheukbinli.original.common.rmi.net.MessageHandle;
-
 import io.netty.channel.ChannelHandlerContext;
 
 /***

@@ -1,10 +1,7 @@
 package com.github.cheukbinli.original.common.util.conver;
 
 import com.github.cheukbinli.original.common.annotation.reflect.Alias;
-import com.github.cheukbinli.original.common.util.reflection.ClassInfo;
-import com.github.cheukbinli.original.common.util.reflection.FieldInfo;
-import com.github.cheukbinli.original.common.util.reflection.ReflectionUtil;
-import com.github.cheukbinli.original.common.util.reflection.Type;
+import com.github.cheukbinli.original.common.util.reflection.*;
 
 import java.lang.reflect.Field;
 import java.text.DateFormat;
@@ -52,65 +49,104 @@ public class ObjectFill {
 		return fillObject(t.newInstance(), data);
 	}
 
-	public static final Map<String, Object> objectToMap(Object o, String... ignore) throws IllegalArgumentException, IllegalAccessException {
+	public static final <T> List<T> fillObjects(Class<T> t, List<Map<String, ?>> data) throws IllegalArgumentException, IllegalAccessException, InstantiationException {
+
+		if (null == t || CollectionUtil.isEmpty(data)) {
+			return null;
+		}
+		List<T> result = new ArrayList<T>(data.size());
+		for (Map<String, ?> item : data) {
+			result.add(fillObject(t.newInstance(), item));
+		}
+		return result;
+	}
+
+	public static final Map<String, Object> objectToMap(Object o, String... ignore) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
 		return objectToMap(o, false, ignore);
 	}
 
-	public static final Map<String, Object> objectToMap(Object o, boolean useAlias, String... ignore) throws IllegalArgumentException, IllegalAccessException {
-		return objectToMap(o, false, false, ignore);
+	public static final Map<String, Object> objectToMap(Object o, boolean useAlias, String... ignore) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
+		return objectToMap(o, false, useAlias, ignore);
 	}
 
-	public static final Map<String, Object> objectToMap(Object o, boolean withOutNull, boolean useAlias, String... ignore) throws IllegalArgumentException, IllegalAccessException {
+	public static final Map<String, Object> objectToMap(Object o, boolean withOutNull, boolean useAlias, String... ignore) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
 		return objectToMap(o, withOutNull, useAlias, false, ignore);
 	}
 
-	public static final Map<String, String> objectToMapString(Object o, boolean withOutNull, boolean useAlias, String dateFormat, String... ignore) throws IllegalArgumentException, IllegalAccessException {
+	public static final Map<String, Object> objectToMap(Object o, boolean withOutNull, boolean useAlias, ToMapProcessHandler handler, String... ignore) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
+		return objectToMap(o, withOutNull, useAlias, false, false, null, handler, ignore);
+	}
+
+	public static final Map<String, String> objectToMapString(Object o, boolean withOutNull, boolean useAlias, String dateFormat, String... ignore) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
 		return castObject(objectToMap(o, withOutNull, useAlias, false, true, dateFormat, ignore));
 	}
 
-	public static final Map<String, Object> objectToMap(Object o, boolean withOutNull, boolean useAlias, boolean underscoreCamel, String... ignore) throws IllegalArgumentException, IllegalAccessException{
+	public static final Map<String, String> objectToMapString(Object o, boolean withOutNull, boolean useAlias, String dateFormat, ToMapProcessHandler handler, String... ignore) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
+		return castObject(objectToMap(o, withOutNull, useAlias, false, true, dateFormat, handler, ignore));
+	}
+
+	public static final Map<String, Object> objectToMap(Object o, boolean withOutNull, boolean useAlias, boolean underscoreCamel, String... ignore) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
 		return objectToMap(o, withOutNull, useAlias, underscoreCamel, false, null, ignore);
 	}
 
-	public static final Map<String, Object> objectToMap(Object o, boolean withOutNull, boolean useAlias, boolean UnderscoreCamel, boolean toString, String dateFormat, String... ignore)
-			throws IllegalArgumentException, IllegalAccessException {
-		if (!FIELDS.containsKey(o.getClass().getName()))
-			scanClass(o.getClass());
-		Map<String, Field> fields = FIELDS.get(o.getClass().getName());
-		Map<String, Object> result = new HashMap<String, Object>();
-		Alias alias;
+	public static final Map<String, Object> objectToMap(Object o, boolean withOutNull, boolean useAlias, boolean underscoreCamel, boolean toString, String dateFormat, String... ignore) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
+		return objectToMap(o, withOutNull, useAlias, underscoreCamel, toString, dateFormat, null, ignore);
+	}
+
+	public static final Map<String, Object> objectToMap(Object o, boolean withOutNull, boolean useAlias, boolean UnderscoreCamel, boolean toString, String dateFormat, ToMapProcessHandler processing, String... ignore)
+			throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
+		if (null == o)
+			return null;
+		final ClassInfo a = ClassInfo.getClassInfo(o.getClass());
+		if (a.isMapOrSetOrCollection() || a.isArrays() || a.isBasicOrArrays())
+			return null;
+
+		if (null == a.getFields())
+			a.setFields(ReflectionUtil.instance().scanClassFieldInfo4Map(a.getClazz(), true, true, true));
+
+		Set<String> igonre = null == ignore ? null : new HashSet<String>(Arrays.asList(ignore));
 		String name = null;
+		Object value = null;
+		Alias alias;
+		DateFormat currentDateFormat = StringUtil.isBlank(dateFormat) ? ObjectFill.defaultDateFormat : new SimpleDateFormat(dateFormat);
 		Set<String> ignoreField = null;
 		if (null != ignore && ignore.length > 0) {
 			ignoreField = new HashSet<String>(Arrays.asList(ignore));
 		}
-		Object value = null;
-		DateFormat currentDateFormat = StringUtil.isBlank(dateFormat) ? ObjectFill.defaultDateFormat : new SimpleDateFormat(dateFormat);
-		for (Entry<String, Field> en : fields.entrySet()) {
-			if ((null == (value = en.getValue().get(o)) && withOutNull) || null != ignoreField && ignoreField.contains(en.getKey())) {
-				continue;
-			}
-			if (useAlias) {
-				alias = en.getValue().getAnnotation(Alias.class);
-				if (null != alias) {
-					name = alias.value();
-					name = name.length() > 0 ? name : en.getKey();
+		Map<String,Object> result =new HashMap<>();
+			for (Entry<String, FieldInfo> en : a.getFields().entrySet()) {
+
+				if ((null == (value = en.getValue().getField().get(o)) && withOutNull) || null != ignoreField && ignoreField.contains(en.getKey())) {
+					continue;
+				}
+				if (useAlias) {
+					alias = en.getValue().getAlias();
+					if (null != alias) {
+						name = alias.value();
+						name = name.length() > 0 ? name : en.getKey();
+					} else {
+						name = en.getKey();
+					}
 				} else {
 					name = en.getKey();
 				}
-			} else {
-				name = en.getKey();
-			}
-			if (toString) {
-				if (value instanceof Date) {
-					value = currentDateFormat.format((Date) value);
-				} else {
-					Type.valueToString(value, null, ClassInfo.getClassInfo(en.getValue().getType()), null, false);
+				if (toString) {
+					if (value instanceof Date) {
+						value = currentDateFormat.format((Date) value);
+					} else {
+						Type.valueToString(value, null, ClassInfo.getClassInfo(en.getValue().getField().getType()), null, false);
+					}
 				}
+				if (null != processing) {
+					value = processing.process(value);
+				}
+				result.put(UnderscoreCamel ? StringUtil.toLowerCaseUnderscoreCamel(name) : name, value);
 			}
-			result.put(UnderscoreCamel ? StringUtil.toLowerCaseUnderscoreCamel(name) : name, value);
-		}
 		return result;
+	}
+
+	public interface ToMapProcessHandler<T, R> {
+		R process(T t);
 	}
 
 	public static final String objectToUrlParams(Object o, boolean useAlias, String... ignore) throws IllegalArgumentException, IllegalAccessException {
@@ -252,14 +288,14 @@ public class ObjectFill {
 	private static String getFirstValue(boolean isArray, Object data) {
 		return isArray ? ((String[]) data)[0] : data.toString();
 	}
-	
+
     public static interface Process<T, U> {
 
         default U before(U u){ return u; }
 
 		default T after(T t){ return t; }
     }
-	
+
 	public static <S,T> List<T> xcopy(final List<S> sources, final Class<T> target, Process<T,S> process, boolean notNull, boolean notTransient, String... ignores) throws Exception {
 
 		if (CollectionUtil.isEmpty(sources) || null == target)
@@ -305,7 +341,7 @@ public class ObjectFill {
 			result.add(obj);
 		}
 		return result;
-		
+
 	}
 
 	public static void xcopy(final Object source, final Object target, boolean notNull, boolean notTransient, String... ignores) throws Exception {
@@ -338,7 +374,7 @@ public class ObjectFill {
 			}
 		}
 	}
-	
+
 	public static <T> T replaceValue(T t, String oldStr, String newStr, String... ignore) throws Throwable {
 		if (null == t) {
 			return t;

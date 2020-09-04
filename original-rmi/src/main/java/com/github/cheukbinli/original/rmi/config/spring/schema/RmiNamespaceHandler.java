@@ -1,13 +1,12 @@
 package com.github.cheukbinli.original.rmi.config.spring.schema;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
-
 import com.github.cheukbinli.original.rmi.config.AnnotationDrivenConfig;
 import com.github.cheukbinli.original.rmi.config.ReferenceGroupConfig;
 import com.github.cheukbinli.original.rmi.config.RmiConfig;
 import com.github.cheukbinli.original.rmi.config.ServiceGroupConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 public class RmiNamespaceHandler extends NamespaceHandlerSupport {
 

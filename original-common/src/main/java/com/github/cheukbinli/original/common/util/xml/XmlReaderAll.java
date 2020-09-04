@@ -1,15 +1,5 @@
 package com.github.cheukbinli.original.common.util.xml;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import com.github.cheukbinli.original.common.util.conver.CollectionUtil;
 import com.github.cheukbinli.original.common.util.conver.ObjectFill;
 import com.github.cheukbinli.original.common.util.conver.StringUtil;
@@ -20,6 +10,15 @@ import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.LinkedList;
+import java.util.List;
 
 /***
  * xml数据填充

@@ -1,14 +1,5 @@
 package com.github.cheukbinli.original.rmi.net.netty.client;
 
-import java.net.InetSocketAddress;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentSkipListMap;
-
-import com.github.cheukbinli.original.rmi.net.netty.NettyMessageEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.cheukbinli.original.cache.FstCacheSerialize;
 import com.github.cheukbinli.original.common.cache.CacheSerialize;
 import com.github.cheukbinli.original.common.rmi.LoadBalanceFactory;
@@ -21,7 +12,7 @@ import com.github.cheukbinli.original.common.util.pool.ObjectPoolManager;
 import com.github.cheukbinli.original.rmi.config.ReferenceGroupConfig.ReferenceGroupModel;
 import com.github.cheukbinli.original.rmi.config.RmiConfig.RmiConfigGroup;
 import com.github.cheukbinli.original.rmi.net.netty.NettyMessageDecoder;
-
+import com.github.cheukbinli.original.rmi.net.netty.NettyMessageEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -31,6 +22,13 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /***
  * 默认客户端实现

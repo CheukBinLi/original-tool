@@ -1,16 +1,10 @@
 package com.github.cheukbinli.original.common.util.reflection;
 
+import com.github.cheukbinli.original.common.util.conver.ReplaceProvider;
+
 import java.math.BigDecimal;
 import java.text.DateFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.RandomAccess;
-import java.util.Set;
-
-import com.github.cheukbinli.original.common.util.conver.ReplaceProvider;
+import java.util.*;
 
 public enum Type {
 					StringType(String.class),

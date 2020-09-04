@@ -1,8 +1,8 @@
 package com.github.cheukbinli.original.common.weixin.mp.model;
 
-import java.io.Serializable;
-
 import com.github.cheukbinli.original.common.annotation.reflect.Alias;
+
+import java.io.Serializable;
 
 /***
  * 

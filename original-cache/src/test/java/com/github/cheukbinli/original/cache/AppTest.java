@@ -1,7 +1,6 @@
 package com.github.cheukbinli.original.cache;
 
 import com.github.cheukbinli.original.common.cache.redis.RedisExcecption;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;

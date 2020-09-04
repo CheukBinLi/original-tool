@@ -1,8 +1,8 @@
 package com.github.cheukbinli.original.common.rmi.model;
 
-import java.io.Serializable;
-
 import com.github.cheukbinli.original.common.rmi.RmiBeanFactory;
+
+import java.io.Serializable;
 
 public class ClassBean implements Serializable {
 

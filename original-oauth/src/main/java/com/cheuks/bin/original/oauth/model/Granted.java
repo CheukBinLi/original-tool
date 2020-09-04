@@ -1,10 +1,9 @@
 package com.github.cheukbinli.original.oauth.model;
 
-import org.springframework.security.core.GrantedAuthority;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 
 @Getter
 @AllArgsConstructor

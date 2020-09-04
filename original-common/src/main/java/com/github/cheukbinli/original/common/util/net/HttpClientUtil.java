@@ -1,18 +1,13 @@
 package com.github.cheukbinli.original.common.util.net;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.github.cheukbinli.original.common.util.conver.CollectionUtil;
+
+import javax.net.ssl.HttpsURLConnection;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.net.ssl.HttpsURLConnection;
-
-import com.github.cheukbinli.original.common.util.conver.CollectionUtil;
 
 public class HttpClientUtil {
 
@@ -71,12 +66,12 @@ public class HttpClientUtil {
 				}
 			}
 			String BOUNDARY = "----------" + System.currentTimeMillis();
-			con.setRequestProperty("Content-Type", "multipart/form-data_template; boundary=" + BOUNDARY);
+			con.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 			StringBuilder sb = new StringBuilder();
 			sb.append("--");
 			sb.append(BOUNDARY);
 			sb.append("\r\n");
-			sb.append("Content-Disposition: form-data_template;name=\"file\";filename=\"" + fileName + "\"\r\n");
+			sb.append("Content-Disposition: form-data;name=\"file\";filename=\"" + fileName + "\"\r\n");
 			sb.append("Content-Type:application/octet-stream\r\n\r\n");
 			byte[] head = sb.toString().getBytes("utf-8");
 			OutputStream out = new DataOutputStream(con.getOutputStream());
@@ -135,7 +130,7 @@ public class HttpClientUtil {
 				}
 			}
 			String BOUNDARY = "" + System.currentTimeMillis();
-			con.setRequestProperty("Content-Type", "multipart/form-data_template; boundary=----" + BOUNDARY);
+			con.setRequestProperty("Content-Type", "multipart/form-data; boundary=----" + BOUNDARY);
 			con.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.8");
 			con.setRequestProperty("Accept", "*/*");
 			con.setRequestProperty("Range", "bytes=" + "");
@@ -144,7 +139,7 @@ public class HttpClientUtil {
 			if (!CollectionUtil.isEmpty(params)) {
 				params.forEach((k, v) -> {
 					sb.append("------").append(BOUNDARY).append("\r\n");
-					sb.append("Content-Disposition: form-data_template; name=\"");
+					sb.append("Content-Disposition: form-data; name=\"");
 					sb.append(k);
 					sb.append("\"\r\n\r\n");
 					sb.append(null == v ? null : isTrim ? v.toString().trim() : v.toString());

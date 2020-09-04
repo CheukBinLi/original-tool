@@ -1,12 +1,11 @@
 package com.github.cheukbinli.original.oauth.security;
 
+import com.github.cheukbinli.original.oauth.model.UserDetail;
+import com.github.cheukbinli.original.oauth.security.token.TokenManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
-import com.github.cheukbinli.original.oauth.model.UserDetail;
-import com.github.cheukbinli.original.oauth.security.token.TokenManager;
 
 public class OauthAuthenticationProvider implements AuthenticationProvider {
 

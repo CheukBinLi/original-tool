@@ -1,12 +1,12 @@
 package com.github.cheukbinli.original.rmi.config;
 
-import java.io.Serializable;
-
 import com.github.cheukbinli.original.rmi.config.ReferenceGroupConfig.ReferenceGroup;
 import com.github.cheukbinli.original.rmi.config.ServiceGroupConfig.ServiceGroup;
 import com.github.cheukbinli.original.rmi.config.model.ProtocolModel;
 import com.github.cheukbinli.original.rmi.config.model.RegistryModel;
 import com.github.cheukbinli.original.rmi.config.model.ScanModel;
+
+import java.io.Serializable;
 
 public class RmiConfigArg implements Serializable {
 

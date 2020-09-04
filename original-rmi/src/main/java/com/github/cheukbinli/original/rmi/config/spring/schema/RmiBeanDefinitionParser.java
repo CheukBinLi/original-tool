@@ -1,13 +1,12 @@
 package com.github.cheukbinli.original.rmi.config.spring.schema;
 
+import com.github.cheukbinli.original.rmi.config.AbstractConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
-
-import com.github.cheukbinli.original.rmi.config.AbstractConfig;
 
 public class RmiBeanDefinitionParser implements BeanDefinitionParser {
 

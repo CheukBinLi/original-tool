@@ -1,10 +1,10 @@
 package com.github.cheukbinli.original.common.cache.redis;
 
+import com.github.cheukbinli.original.common.util.conver.StringUtil;
+
 import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.github.cheukbinli.original.common.util.conver.StringUtil;
 
 public class Script implements Serializable{
 

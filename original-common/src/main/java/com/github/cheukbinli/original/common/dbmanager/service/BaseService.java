@@ -1,10 +1,10 @@
 package com.github.cheukbinli.original.common.dbmanager.service;
 
+import com.github.cheukbinli.original.common.dbmanager.BasePage;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-
-import com.github.cheukbinli.original.common.dbmanager.BasePage;
 
 public interface BaseService<entity, ID extends Serializable> {
 

@@ -1,7 +1,6 @@
 package com.github.cheukbinli.original.rmi.t;
 
 import org.junit.Test;
-//import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -9,6 +8,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+//import sun.misc.Unsafe;
 
 /***
  * *

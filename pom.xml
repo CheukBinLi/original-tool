@@ -7,7 +7,7 @@
     <groupId>com.github.cheukbinli</groupId>
     <artifactId>original-tool</artifactId>
     <!--    <version>${version.prefix}-${version.suffix}</version>-->
-    <version>1.0.0.1-RELEASE</version>
+    <version>1.0.0.2b-RELEASE</version>
     <packaging>pom</packaging>
     <name>original-tool</name>
     <url>https://github.com/CheukBinLi/original-tool</url>
@@ -43,6 +43,17 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
+
+<!--        <repository>-->
+<!--            <id>nexus-releases</id>-->
+<!--            <name>Nexus Releases Respository</name>-->
+<!--            <url>http://192.168.0.248:8081/nexus/content/repositories/releases</url>-->
+<!--        </repository>-->
+<!--        <snapshotRepository>-->
+<!--            <id>nexus-snapshots</id>-->
+<!--            <name>Nexus Snapshots Repository</name>-->
+<!--            <url>http://192.168.0.248:8081/nexus/content/repositories/snapshots</url>-->
+<!--        </snapshotRepository>-->
     </distributionManagement>
 
     <build>
@@ -171,6 +182,8 @@
         <module>original-cache</module>
         <module>original-qrcode</module>
         <module>original-rmi</module>
+        <module>original-spring-plugin</module>
+        <!--        <module>original-spring-boot-starter</module>-->
     </modules>
 
 </project>

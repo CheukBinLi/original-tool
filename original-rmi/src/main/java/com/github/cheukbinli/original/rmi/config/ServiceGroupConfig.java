@@ -1,9 +1,9 @@
 package com.github.cheukbinli.original.rmi.config;
 
-import java.io.Serializable;
-import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListMap;
-
+import com.github.cheukbinli.original.common.rmi.RmiBeanFactory;
+import com.github.cheukbinli.original.common.rmi.RmiContant;
+import com.github.cheukbinli.original.common.util.conver.CollectionUtil;
+import com.github.cheukbinli.original.common.util.conver.StringUtil;
 import com.github.cheukbinli.original.rmi.GenerateRmiBeanFactory;
 import com.github.cheukbinli.original.rmi.config.model.ServiceModel;
 import com.github.cheukbinli.original.rmi.model.MethodBean;
@@ -14,10 +14,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.github.cheukbinli.original.common.rmi.RmiBeanFactory;
-import com.github.cheukbinli.original.common.rmi.RmiContant;
-import com.github.cheukbinli.original.common.util.conver.CollectionUtil;
-import com.github.cheukbinli.original.common.util.conver.StringUtil;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public class ServiceGroupConfig extends AbstractConfig implements RmiContant {
 

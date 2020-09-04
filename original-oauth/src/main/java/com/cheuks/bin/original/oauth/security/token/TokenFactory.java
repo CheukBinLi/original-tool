@@ -1,14 +1,13 @@
 package com.github.cheukbinli.original.oauth.security.token;
 
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-
 import com.github.cheukbinli.original.common.util.conver.StringUtil;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @Deprecated
 public class TokenFactory {

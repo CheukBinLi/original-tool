@@ -1,12 +1,5 @@
 package com.github.cheukbinli.original.common.util.xml;
 
-import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.github.cheukbinli.original.common.annotation.reflect.Alias;
 import com.github.cheukbinli.original.common.util.conver.CollectionUtil;
 import com.github.cheukbinli.original.common.util.conver.StringUtil;
@@ -14,6 +7,13 @@ import com.github.cheukbinli.original.common.util.reflection.ClassInfo;
 import com.github.cheukbinli.original.common.util.reflection.FieldInfo;
 import com.github.cheukbinli.original.common.util.reflection.ReflectionCache;
 import com.github.cheukbinli.original.common.util.reflection.ReflectionUtil;
+
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /***
  * 

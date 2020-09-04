@@ -1,5 +1,11 @@
 package com.github.cheukbinli.original.rmi.unit;
 
+import com.github.cheukbinli.original.common.util.Encryption;
+import com.github.cheukbinli.original.common.util.reflection.ReflectionUtil;
+import javassist.CtClass;
+import javassist.CtMethod;
+import javassist.NotFoundException;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -9,13 +15,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import com.github.cheukbinli.original.common.util.Encryption;
-import com.github.cheukbinli.original.common.util.reflection.ReflectionUtil;
-
-import javassist.CtClass;
-import javassist.CtMethod;
-import javassist.NotFoundException;
 
 public class Reflection extends ReflectionUtil {
 

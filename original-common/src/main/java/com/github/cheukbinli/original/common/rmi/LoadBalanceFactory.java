@@ -1,8 +1,8 @@
 package com.github.cheukbinli.original.common.rmi;
 
-import java.util.List;
-
 import com.github.cheukbinli.original.common.rmi.model.RegisterLoadBalanceModel;
+
+import java.util.List;
 
 /***
  * 

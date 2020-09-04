@@ -1,10 +1,10 @@
 package com.github.cheukbinli.original.common.weixin.mp;
 
-import java.util.List;
-import java.util.concurrent.Callable;
-
 import com.github.cheukbinli.original.common.weixin.content.MessageType;
 import com.github.cheukbinli.original.common.weixin.mp.model.MessageEventModel;
+
+import java.util.List;
+import java.util.concurrent.Callable;
 
 public interface MessageEventHandleWorker<T> extends Callable<T>, MessageType {
 

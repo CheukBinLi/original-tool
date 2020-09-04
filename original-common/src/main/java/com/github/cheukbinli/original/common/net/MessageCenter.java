@@ -1,14 +1,10 @@
 package com.github.cheukbinli.original.common.net;
 
-import java.io.Serializable;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListMap;
-
 import com.github.cheukbinli.original.common.util.conver.CollectionUtil;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public interface MessageCenter<INPUT extends Object, MODEL extends Serializable, TYPE extends Object> {
 

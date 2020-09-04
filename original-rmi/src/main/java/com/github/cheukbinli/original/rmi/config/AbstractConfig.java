@@ -1,16 +1,16 @@
 package com.github.cheukbinli.original.rmi.config;
 
-import java.io.Serializable;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.util.Map;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
+
+import java.io.Serializable;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.util.Map;
 
 public abstract class AbstractConfig implements Serializable, Cloneable {
 

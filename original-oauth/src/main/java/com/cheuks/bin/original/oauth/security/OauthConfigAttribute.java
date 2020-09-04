@@ -1,11 +1,10 @@
 package com.github.cheukbinli.original.oauth.security;
 
-import org.springframework.security.access.ConfigAttribute;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.access.ConfigAttribute;
 
 @Getter
 @Setter

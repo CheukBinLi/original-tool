@@ -1,10 +1,10 @@
 package com.github.cheukbinli.original.common.rmi.net;
 
-import java.io.Serializable;
-
 import com.github.cheukbinli.original.common.cache.CacheException;
 import com.github.cheukbinli.original.common.cache.CacheSerialize;
 import com.github.cheukbinli.original.common.rmi.RmiException;
+
+import java.io.Serializable;
 
 /***
  * 

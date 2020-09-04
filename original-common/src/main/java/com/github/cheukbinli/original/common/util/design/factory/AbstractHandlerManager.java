@@ -1,14 +1,13 @@
 package com.github.cheukbinli.original.common.util.design.factory;
 
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.cheukbinli.original.common.util.conver.StringUtil;
 import com.github.cheukbinli.original.common.util.reflection.ClassInfo;
 import com.github.cheukbinli.original.common.util.reflection.ReflectionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public abstract class AbstractHandlerManager<T extends Handler<?>> implements HandlerManager<T, String> {
 

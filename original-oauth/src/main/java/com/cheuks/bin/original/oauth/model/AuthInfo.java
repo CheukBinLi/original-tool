@@ -1,13 +1,12 @@
 package com.github.cheukbinli.original.oauth.model;
 
-import java.io.Serializable;
-import java.util.Set;
-
 import com.github.cheukbinli.original.common.util.SignUtil;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.io.Serializable;
+import java.util.Set;
 
 @Getter
 @AllArgsConstructor

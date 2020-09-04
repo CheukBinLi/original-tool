@@ -1,13 +1,11 @@
 package com.github.cheukbinli.original.rmi.net.netty;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.cheukbinli.original.common.rmi.model.ConsumerValueModel;
 import com.github.cheukbinli.original.common.rmi.net.NetworkClient;
-
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /***
  * 
