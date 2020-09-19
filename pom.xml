@@ -7,7 +7,7 @@
     <groupId>com.github.cheukbinli</groupId>
     <artifactId>original-tool</artifactId>
     <!--    <version>${version.prefix}-${version.suffix}</version>-->
-    <version>1.0.0.2b-RELEASE</version>
+    <version>1.0.0.2d-RELEASE</version>
     <packaging>pom</packaging>
     <name>original-tool</name>
     <url>https://github.com/CheukBinLi/original-tool</url>
@@ -183,9 +183,11 @@
         <module>original-qrcode</module>
         <module>original-rmi</module>
         <module>original-spring-plugin</module>
+        <!--<module>original-oauth</module>-->
+        <!-- <module>original-oauth-web</module>-->
         <!--        <module>original-spring-boot-starter</module>-->
     </modules>
 
 </project>
-<!--         版本发布  clean deploy -P release &#45;&#45;settings /usr/local/maven3.6.2/conf/settings.xml-->
-<!--        修改版本  versions:set -DnewVersion=1.0-SNAPSHOT &#45;&#45;settings /usr/local/maven3.6.2/conf/settings.xml-->
+        <!--         版本发布  clean deploy -P release &#45;&#45;settings /usr/local/maven3.6.2/conf/settings.xml-->
+        <!--        修改版本  versions:set -DnewVersion=1.0-SNAPSHOT &#45;&#45;settings /usr/local/maven3.6.2/conf/settings.xml-->

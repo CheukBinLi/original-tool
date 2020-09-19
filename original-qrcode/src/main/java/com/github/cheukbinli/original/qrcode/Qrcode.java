@@ -20,7 +20,7 @@ import java.util.Base64;
  */
 public class Qrcode {
 
-    static final String QRCODE_DATA_PATH = "/data_template";
+    static final String QRCODE_DATA_PATH = "data_template";
     char qrcodeErrorCorrect;
     char qrcodeEncodeMode;
     int qrcodeVersion;

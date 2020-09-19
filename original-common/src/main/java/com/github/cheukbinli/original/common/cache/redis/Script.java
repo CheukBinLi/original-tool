@@ -24,7 +24,7 @@ public class Script implements Serializable{
 	 * 脚本
 	 */
 	private String script;
-	
+
 	private final String[] defaultWrap = new String[]{"", ""};
 
 	private String[] wrap;
@@ -102,8 +102,8 @@ public class Script implements Serializable{
 		this.script = script;
 		return this;
 	}
-	
-	
+
+
 	public String[] getWrap() {
 		return wrap;
 	}
@@ -115,6 +115,11 @@ public class Script implements Serializable{
 		this.wrap = new String[]{left, right};
 		return this;
 	}
+
+    @Override
+    public Script clone() throws CloneNotSupportedException {
+        return (Script) super.clone();
+    }
 
 	public static void main(String[] args) throws RedisExcecption {
 		String a="{application:@{pay}}-lock:@{function}-@{tenant}";

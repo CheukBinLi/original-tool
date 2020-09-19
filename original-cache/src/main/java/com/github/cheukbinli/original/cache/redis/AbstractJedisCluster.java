@@ -4,8 +4,8 @@ import com.github.cheukbinli.original.cache.FstCacheSerialize;
 import com.github.cheukbinli.original.common.cache.CacheSerialize;
 import com.github.cheukbinli.original.common.cache.redis.RedisExcecption;
 import com.github.cheukbinli.original.common.cache.redis.RedisFactory;
+import com.github.cheukbinli.original.common.cache.redis.RedisUtil;
 import com.github.cheukbinli.original.common.cache.redis.Script;
-import com.github.cheukbinli.original.common.util.conver.StringUtil;
 import com.github.cheukbinli.original.common.util.scan.Scan;
 import com.github.cheukbinli.original.common.util.scan.ScanSimple;
 import org.slf4j.Logger;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings({ "unchecked" })
-public abstract class AbstractJedisCluster<T extends JedisCluster> implements RedisFactory {
+public abstract class AbstractJedisCluster<T extends JedisCluster> implements RedisUtil, RedisFactory {
 
 	private int expireSecond = 1800;// 30分钟
 
@@ -42,6 +42,24 @@ public abstract class AbstractJedisCluster<T extends JedisCluster> implements Re
 	private final Map<String, String> scriptPath = new ConcurrentHashMap<String, String>();
 	private final Map<String, Script> SCRIPT = new ConcurrentHashMap<String, Script>();
 	private final Map<String, String> SCRIPTLOADED = new ConcurrentHashMap<String, String>();
+
+    @Override
+    public Map<String, String> getSha() {
+        return sha;
+    }
+
+    @Override
+    public Map<String, String> getScriptPath() {
+        return scriptPath;
+    }
+
+    public Map<String, Script> getScript() {
+        return SCRIPT;
+    }
+
+    public Map<String, String> getScriptLoaded() {
+        return SCRIPTLOADED;
+    }
 
 	public CacheSerialize getCacheSerialize() {
 		if (null == cacheSerialize) {
@@ -1380,35 +1398,35 @@ public abstract class AbstractJedisCluster<T extends JedisCluster> implements Re
 		return encoding;
 	}
 
-	@Override
-	public AbstractJedisCluster<T> appendScript(Script... script) {
-		for (Script item : script) {
-			SCRIPT.put(item.getName(), item);
-		}
-		return this;
-	}
-
-	@Override
-	public String scriptLoad(Script script, String... keys) throws RedisExcecption {
-		String key = script.format(keys);
-		String sha1 = new String(scriptLoad(key, script.getScript()));
-		SCRIPTLOADED.put(key, sha1);
-		return sha1;
-	}
-
-	@Override
-	public Object evalShaByScript(String scriptName, int keys, String... keysAndArgs) throws RedisExcecption {
-//		String [] keysParam=new String[keys];
-//		if (keys > 0 && (null == keysAndArgs || keysAndArgs.length >= keys)) {
-//			keysParam = Arrays.copyOfRange(keysAndArgs, 0, keys);
+//	@Override
+//	public AbstractJedisCluster<T> appendScript(Script... script) {
+//		for (Script item : script) {
+//			SCRIPT.put(item.getName(), item);
 //		}
-		Script script = SCRIPT.get(scriptName);
-		String key = Script.format(script.getSlotName(), keysAndArgs);
-		String sha1 = SCRIPTLOADED.get(key);
-		if (StringUtil.isBlank(sha1)) {
-			sha1 = scriptLoad(SCRIPT.get(scriptName), keysAndArgs);
-		}
-		return evalSha(sha1, keys, keysAndArgs);
-	}
+//		return this;
+//	}
+//
+//	@Override
+//	public String scriptLoad(Script script, String... keys) throws RedisExcecption {
+//		String key = script.format(keys);
+//		String sha1 = new String(scriptLoad(key, script.getScript()));
+//		SCRIPTLOADED.put(key, sha1);
+//		return sha1;
+//	}
+//
+//	@Override
+//	public Object evalShaByScript(String scriptName, int keys, String... keysAndArgs) throws RedisExcecption {
+////		String [] keysParam=new String[keys];
+////		if (keys > 0 && (null == keysAndArgs || keysAndArgs.length >= keys)) {
+////			keysParam = Arrays.copyOfRange(keysAndArgs, 0, keys);
+////		}
+//		Script script = SCRIPT.get(scriptName);
+//		String key = Script.format(script.getSlotName(), keysAndArgs);
+//		String sha1 = SCRIPTLOADED.get(key);
+//		if (StringUtil.isBlank(sha1)) {
+//			sha1 = scriptLoad(SCRIPT.get(scriptName), keysAndArgs);
+//		}
+//		return evalSha(sha1, keys, keysAndArgs);
+//	}
 	
 }
