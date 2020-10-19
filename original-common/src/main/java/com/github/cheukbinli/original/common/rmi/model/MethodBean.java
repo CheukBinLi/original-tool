@@ -7,24 +7,24 @@ public class MethodBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final ClassBean classBean;
+	private final com.github.cheukbinli.original.common.rmi.model.ClassBean classBean;
 	private Method currentMethod;
 	private String id;
 
-	public MethodBean(ClassBean classBean, Method currentMethod, String id) {
+	public MethodBean(com.github.cheukbinli.original.common.rmi.model.ClassBean classBean, Method currentMethod, String id) {
 		super();
 		this.classBean = classBean;
 		this.currentMethod = currentMethod;
 		this.id = id;
 	}
 
-	public MethodBean(ClassBean classBean, Method currentMethod) {
+	public MethodBean(com.github.cheukbinli.original.common.rmi.model.ClassBean classBean, Method currentMethod) {
 		super();
 		this.classBean = classBean;
 		this.currentMethod = currentMethod;
 	}
 
-	public MethodBean(ClassBean classBean) {
+	public MethodBean(com.github.cheukbinli.original.common.rmi.model.ClassBean classBean) {
 		super();
 		this.classBean = classBean;
 	}
@@ -47,7 +47,7 @@ public class MethodBean implements Serializable {
 		return this;
 	}
 
-	public ClassBean getClassBean() {
+	public com.github.cheukbinli.original.common.rmi.model.ClassBean getClassBean() {
 		return classBean;
 	}
 

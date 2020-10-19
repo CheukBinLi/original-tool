@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /***
  * *
@@ -20,39 +21,41 @@ import java.util.*;
  *
  *
  */
-public interface RedisUtil extends RedisFactory {
+public interface RedisUtil extends com.github.cheukbinli.original.common.cache.redis.RedisFactory {
 
-    Script generateSerialNumberScript = new Script();
+    com.github.cheukbinli.original.common.cache.redis.Script generateSerialNumberScript = new com.github.cheukbinli.original.common.cache.redis.Script();
 
     Map<String, String> getSha();
 
     Map<String, String> getScriptPath();
 
-    Map<String, Script> getScript();
+    Map<String, com.github.cheukbinli.original.common.cache.redis.Script> getScript();
 
     Map<String, String> getScriptLoaded();
 
-    default RedisFactory appendScript(Script... script) {
-        for (Script item : script) {
+    AtomicBoolean hightVersion = new AtomicBoolean(false);
+
+    default com.github.cheukbinli.original.common.cache.redis.RedisFactory appendScript(com.github.cheukbinli.original.common.cache.redis.Script... script) {
+        for (com.github.cheukbinli.original.common.cache.redis.Script item : script) {
             getScript().put(item.getName(), item);
         }
         return this;
     }
 
-    default String scriptLoad(Script script, String... keys) throws RedisExcecption {
+    default String scriptLoad(com.github.cheukbinli.original.common.cache.redis.Script script, String... keys) throws com.github.cheukbinli.original.common.cache.redis.RedisExcecption {
         String key = script.format(keys);
         String sha1 = new String(scriptLoad(key, script.getScript()));
         getScriptLoaded().put(key, sha1);
         return sha1;
     }
 
-    default Object evalShaByScript(String scriptName, int keys, String... keysAndArgs) throws RedisExcecption {
+    default Object evalShaByScript(String scriptName, int keys, String... keysAndArgs) throws com.github.cheukbinli.original.common.cache.redis.RedisExcecption {
 //		String [] keysParam=new String[keys];
 //		if (keys > 0 && (null == keysAndArgs || keysAndArgs.length >= keys)) {
 //			keysParam = Arrays.copyOfRange(keysAndArgs, 0, keys);
 //		}
-        Script script = getScript().get(scriptName);
-        String key = Script.format(script.getSlotName(), keysAndArgs);
+        com.github.cheukbinli.original.common.cache.redis.Script script = getScript().get(scriptName);
+        String key = com.github.cheukbinli.original.common.cache.redis.Script.format(script.getSlotName(), keysAndArgs);
         String sha1 = getScriptLoaded().get(key);
         if (StringUtil.isBlank(sha1)) {
             sha1 = scriptLoad(getScript().get(scriptName), keysAndArgs);
@@ -61,18 +64,24 @@ public interface RedisUtil extends RedisFactory {
     }
 
 
-    default Script getGenerateSerialNumberScript() throws RedisExcecption {
+    default com.github.cheukbinli.original.common.cache.redis.Script getGenerateSerialNumberScript() throws com.github.cheukbinli.original.common.cache.redis.RedisExcecption {
         try {
             if (StringUtil.isBlank(generateSerialNumberScript.getScript())) {
-                synchronized (RedisFactory.class) {
+                synchronized (com.github.cheukbinli.original.common.cache.redis.RedisFactory.class) {
                     if (StringUtil.isBlank(generateSerialNumberScript.getScript())) {
-                        InputStream in = RedisFactory.class.getResource("GenerateSerialNumber.properties").openStream();
+                        InputStream in = com.github.cheukbinli.original.common.cache.redis.RedisFactory.class.getResource("GenerateSerialNumber.properties").openStream();
                         Properties properties = System.getProperties();
                         properties.load(in);
                         generateSerialNumberScript.setName(properties.get("redis.script.GenerateSerialNumber.name").toString());
                         generateSerialNumberScript.setSlotName(properties.get("redis.script.GenerateSerialNumber.slotName").toString());
+                        String redisVersion = StringUtil.isBlank(System.getProperty("redis.script.GenerateSerialNumber.version"), "3");
+
+                        String GenerateSerialNumberFileName = "GenerateSerialNumber";
+                        boolean isHightVersion;
+                        GenerateSerialNumberFileName = ((isHightVersion = Float.valueOf(redisVersion) > 3.2) ? GenerateSerialNumberFileName + "_v4" : GenerateSerialNumberFileName) + ".lua";
+                        hightVersion.set(isHightVersion);
                         in.close();
-                        in = RedisFactory.class.getResource("GenerateSerialNumber.lua").openStream();
+                        in = com.github.cheukbinli.original.common.cache.redis.RedisFactory.class.getResource(GenerateSerialNumberFileName).openStream();
                         InputStreamReader reader = new InputStreamReader(in);
                         char[] buff = new char[1024];
                         int offer = 0;
@@ -89,17 +98,17 @@ public interface RedisUtil extends RedisFactory {
             }
             return generateSerialNumberScript;
         } catch (IOException e) {
-            throw new RedisExcecption(e);
+            throw new com.github.cheukbinli.original.common.cache.redis.RedisExcecption(e);
         }
     }
 
-    default List<String> generateSerialNumber(String tag, String tenant, String application, String module, int quantity) throws RedisExcecption {
-        Script script = getGenerateSerialNumberScript();
+    default List<String> generateSerialNumber(String tag, String tenant, String application, String module, int quantity) throws com.github.cheukbinli.original.common.cache.redis.RedisExcecption {
+        com.github.cheukbinli.original.common.cache.redis.Script script = getGenerateSerialNumberScript();
         if (null == script) {
-            throw new RedisExcecption("can't read GenerateSerialNumber.properties");
+            throw new com.github.cheukbinli.original.common.cache.redis.RedisExcecption("can't read GenerateSerialNumber.properties");
         }
-        String[] keysAndArgs = new String[]{tag, tenant, application, module, Integer.toString(quantity)};
-        String key = Script.format(String.format(script.getSlotName(), tag, tenant, application, module), keysAndArgs);
+        String[] keysAndArgs = new String[]{tag, tenant, application, module, Integer.toString(quantity), hightVersion.get() ? "0" : Math.floorDiv(System.currentTimeMillis(), 1000) + ""};
+        String key = com.github.cheukbinli.original.common.cache.redis.Script.format(String.format(script.getSlotName(), tag, tenant, application, module), keysAndArgs);
 
 
         String sha1 = getScriptLoaded().get(key);
@@ -107,7 +116,7 @@ public interface RedisUtil extends RedisFactory {
             String scriptStr = script.getScript();
             script = getScript().get(key);
             if (null == script) {
-                script = new Script();
+                script = new com.github.cheukbinli.original.common.cache.redis.Script();
                 script
                         .setName(key)
                         .setSlotName(key)
@@ -119,17 +128,17 @@ public interface RedisUtil extends RedisFactory {
         Object result = null;
         try {
             result = evalSha(sha1, 1, keysAndArgs);
-        } catch (RedisExcecption e) {
+        } catch (com.github.cheukbinli.original.common.cache.redis.RedisExcecption e) {
 
             if (null != e && null != e.getMessage() && e.getMessage().contains("NOSCRIPT")) {
                 try {
                     scriptLoad(script, keysAndArgs);
                     result = evalSha(sha1, 1, keysAndArgs);
-                } catch (RedisExcecption ex) {
+                } catch (com.github.cheukbinli.original.common.cache.redis.RedisExcecption ex) {
                     throw ex;
                 }
             }
-            throw new RedisExcecption(e);
+            throw new com.github.cheukbinli.original.common.cache.redis.RedisExcecption(e);
         }
         if (result instanceof Collection) {
             return (List) result;

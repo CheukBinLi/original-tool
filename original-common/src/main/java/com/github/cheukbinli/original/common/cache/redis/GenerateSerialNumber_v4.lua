@@ -26,7 +26,7 @@ end
 local function getTime()
     local time = redis.call("GET", "TIME");
     if ("false" == tostring(time)) then
-        --redis.replicate_commands();
+        redis.replicate_commands();
         time = redis.call("TIME")[1];
         local expire = 3600 - getSecond(getDayOfTime(time));
         time = redis.call("SETEX", "TIME", expire, time);
@@ -36,13 +36,13 @@ end
 local function getKey(sequenceKey, tenantKey, appKey, module)
     return sequenceKey .. "_" .. tenantKey .. "_" .. appKey .. ":" .. module;
 end
-local function getTime(timeZone, time)
+local function getTime(timeZone)
     local result = {};
     --time zone
     timeZone = timeZone * 3600;
     --current time
-    --redis.replicate_commands();
-    --local time = redis.call("TIME")[1] + timeZone;
+    redis.replicate_commands();
+    local time = redis.call("TIME")[1] + timeZone;
     --daysz
     local days = { 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335 }
     --:year-benchmarkYear
@@ -89,12 +89,12 @@ local function getTime(timeZone, time)
     table.insert(result, expire);
     return result;
 end
-local function getSequenceTime(timeZone, time)
+local function getSequenceTime(timeZone)
     local SEQUENCE_TIME = "DEFAULT_SEQUENCE_TIME";
     local result = redis.call("GET", SEQUENCE_TIME);
     if ("false" == tostring(result)) then
         local SEQUENCE_TIME_FORMAT = "%d%03d%02d";
-        local time = getTime(timeZone, time);
+        local time = getTime(timeZone);
         result = string.format(SEQUENCE_TIME_FORMAT, time[3], time[2], time[6]);
         redis.call("SETEX", SEQUENCE_TIME, time[7], result);
     end
@@ -103,9 +103,9 @@ end
 local function getSequenceTimeExpire()
     return redis.call("TTL", "DEFAULT_SEQUENCE_TIME");
 end
-local function next(sequenceKey, tenantKey, appKey, module, quantity, timeZone, time)
+local function next(sequenceKey, tenantKey, appKey, module, quantity, timeZone)
     local sequenceResult;
-    local sequenceTime = getSequenceTime(timeZone, time);
+    local sequenceTime = getSequenceTime(timeZone);
     local key = sequenceTime .. getKey(sequenceKey, tenantKey, appKey, module);
     local result = {};
     if (tonumber(quantity) > 1) then
@@ -133,8 +133,7 @@ local appKey = ARGV[2];
 local module = ARGV[3];
 --get generate of number  
 local quantity = tonumber(ARGV[4]);
-local timestamp = ARGV[5];
 if (quantity < 1) then
     quantity = 1;
 end
-return next(sequenceKey, tenantKey, appKey, module, quantity, 8, timestamp);
+return next(sequenceKey, tenantKey, appKey, module, quantity, 8);

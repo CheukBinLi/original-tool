@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.cheukbinli</groupId>
         <artifactId>original-tool</artifactId>
-        <version>1.0.0.2d-RELEASE</version>
+        <version>1.0.0.2h-RELEASE</version>
     </parent>
     <artifactId>original-qrcode</artifactId>
     <name>original-qrcode</name>

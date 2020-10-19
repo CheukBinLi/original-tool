@@ -250,8 +250,8 @@ public final class GenerateRmiBeanFactory implements RmiContant {
 		rmiClientInvokeMethod.getFieldInfo().addAttribute(autoired);
 		newClass.addField(rmiClientInvokeMethod);
 
-		CtMethod getting = CtMethod.make("public com.github.cheukbinli.original.common.rmi.RmiInvokeClient getRmiClientInvokeMethod(){return rmiClientInvokeMethod;}", newClass);
-		CtMethod setting = CtMethod.make("public void setRmiClientInvokeMethod(com.github.cheukbinli.original.common.rmi.RmiInvokeClient rmiClientInvokeMethod){this.rmiClientInvokeMethod=rmiClientInvokeMethod;}", newClass);
+		CtMethod getting = CtMethod.make("public RmiInvokeClient getRmiClientInvokeMethod(){return rmiClientInvokeMethod;}", newClass);
+		CtMethod setting = CtMethod.make("public void setRmiClientInvokeMethod(RmiInvokeClient rmiClientInvokeMethod){this.rmiClientInvokeMethod=rmiClientInvokeMethod;}", newClass);
 		newClass.addMethod(getting);
 		newClass.addMethod(setting);
 

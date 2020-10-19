@@ -1,6 +1,5 @@
 package com.github.cheukbinli.original.oauth.security;
 
-import com.github.cheukbinli.original.common.util.web.ResultFactory;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
@@ -11,13 +10,13 @@ import java.io.IOException;
 
 public class OauthAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    @SuppressWarnings("unused")
-    private ResultFactory resultFactory;
-
-    public OauthAuthenticationEntryPoint(ResultFactory resultFactory) {
-        super();
-        this.resultFactory = resultFactory;
-    }
+//    @SuppressWarnings("unused")
+//    private ResultFactory resultFactory;
+//
+//    public OauthAuthenticationEntryPoint(ResultFactory resultFactory) {
+//        super();
+//        this.resultFactory = resultFactory;
+//    }
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {

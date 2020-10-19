@@ -16,19 +16,19 @@ public interface CacheFactory<K, V> {
     /**
      * 取出
      */
-    V take(K key) throws CacheException;
+    V take(K key) throws com.github.cheukbinli.original.common.cache.CacheException;
 
-    V put(K key, V value) throws CacheException;
+    V put(K key, V value) throws com.github.cheukbinli.original.common.cache.CacheException;
 
-    V remove(K key) throws CacheException;
+    V remove(K key) throws com.github.cheukbinli.original.common.cache.CacheException;
 
-    void scriptClear() throws CacheException;
+    void scriptClear() throws com.github.cheukbinli.original.common.cache.CacheException;
 
-    int size() throws CacheException;
+    int size() throws com.github.cheukbinli.original.common.cache.CacheException;
 
-    Set<K> keys() throws CacheException;
+    Set<K> keys() throws com.github.cheukbinli.original.common.cache.CacheException;
 
-    Collection<V> values() throws CacheException;
+    Collection<V> values() throws com.github.cheukbinli.original.common.cache.CacheException;
 
     default void dectory() {
     }
