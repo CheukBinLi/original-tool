@@ -124,7 +124,7 @@ public class ClassLoaderUtil {
 
 	@SuppressWarnings({"unused", "static-access", "unchecked", "rawtypes", "deprecation"})
 	public static void main(String[] args) throws CacheException, Exception {
-			System.out.printf(URLDecoder.decode("https%3A%2F%2Fai-test.bgyfw.com%3A55871%2Failogic"));
+			System.out.printf(URLDecoder.decode("https%3A%2F%2Fai-test.bgyfws.com%3A55871%2Failogic"));
 		ClassLoader x = new ClassLoader() {
 		};
 		System.err.println(System.getProperty("java.class.path"));

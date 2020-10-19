@@ -10,11 +10,11 @@
                     pattern="[%d{HH:mm:ss:SSS}] [%p] - %l - %m%n"/>
         </console>
 
-        <!--  		<LogstashAppender name="LOGSTASH" host="10.10.171.151" port="4560" pattern="%l - %m%n">
-                    <KeyValuePair key="app_name" value="one/backend/api/mgr" />
+        <!--  		<LogstashAppender name="LOGSTASH" host="10.10.171.152" port="4560" pattern="%l - %m%n">
+                    <KeyValuePair key="app_name" value="one/backend/api/msg" />
                     <KeyValuePair key="platform" value="backend" />
                     <KeyValuePair key="@version" value="release" />
-                    <KeyValuePair key="tags" value="one-backend-api-mgr:release" />
+                    <KeyValuePair key="tags" value="one-backend-api-msg:release" />
                     <replace regex="\r\n|\n\r|\t\r|\r\t|\n\t|\t\r|\n|\r|\t" replacement=" &lt;/br&gt; "/>
                 </LogstashAppender> -->
     </appenders>
@@ -22,7 +22,7 @@
         <!--过滤掉spring和hibernate的一些无用的debug信息 -->
         <logger name="org.springframework" level="INFO">
         </logger>
-        <!-- 		<logger name="com.bgyfw.app.one" level="ERROR">
+        <!-- 		<logger name="com.bgyfws.app.onb" level="ERROR">
                     <appender-ref ref="LOGSTASH" />
                 </logger> -->
         <root level="INFO">
