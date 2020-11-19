@@ -6,7 +6,7 @@
     <parent>
         <artifactId>original-tool</artifactId>
         <groupId>com.github.cheukbinli</groupId>
-        <version>1.0.0.2-RELEASE</version>
+        <version>1.0.0.2i-RELEASE</version>
     </parent>
     <packaging>pom</packaging>
     <groupId>com.github.cheukbinli</groupId>

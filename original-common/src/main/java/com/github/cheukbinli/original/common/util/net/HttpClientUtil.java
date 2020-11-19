@@ -2,10 +2,14 @@ package com.github.cheukbinli.original.common.util.net;
 
 import com.github.cheukbinli.original.common.util.conver.CollectionUtil;
 
-import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -302,4 +306,29 @@ public class HttpClientUtil {
 		}
 		return result;
 	}
+
+	public static void ignoreCerts() throws NoSuchAlgorithmException, KeyManagementException {
+		TrustManager[] trustAllCerts = new TrustManager[1];
+		trustAllCerts[0] = new X509TrustManager() {
+			public X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
+
+			public void checkServerTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+			}
+
+			public void checkClientTrusted(X509Certificate[] certs, String authType) throws CertificateException {
+			}
+		};
+
+		SSLContext sc = SSLContext.getInstance("SSL");
+		sc.init(null, trustAllCerts, null);
+		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+			public boolean verify(String urlHostName, SSLSession session) {
+				return true;
+			}
+		});
+	}
+
 }
