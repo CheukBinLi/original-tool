@@ -12,7 +12,6 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
 import java.util.Map.Entry;
 
 @SuppressWarnings("unused")

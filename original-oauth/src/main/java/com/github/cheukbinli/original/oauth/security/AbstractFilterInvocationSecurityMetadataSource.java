@@ -8,7 +8,6 @@ import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.intercept.FilterInvocationSecurityMetadataSource;
 import org.springframework.util.AntPathMatcher;
 
-import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class AbstractFilterInvocationSecurityMetadataSource implements FilterInvocationSecurityMetadataSource {
