@@ -7,7 +7,7 @@
     <groupId>com.github.cheukbinli</groupId>
     <artifactId>original-tool</artifactId>
     <!--    <version>${version.prefix}-${version.suffix}</version>-->
-    <version>1.0.0.3-RELEASE</version>
+    <version>1.0.0.3.1-RELEASE</version>
     <packaging>pom</packaging>
     <name>original-tool</name>
     <url>https://github.com/CheukBinLi/original-tool</url>

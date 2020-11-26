@@ -5,7 +5,7 @@
     <parent>
         <artifactId>original-tool</artifactId>
         <groupId>com.github.cheukbinli</groupId>
-        <version>1.0.0.3-RELEASE</version>
+        <version>1.0.0.3.1-RELEASE</version>
     </parent>
     <packaging>pom</packaging>
     <modelVersion>4.0.0</modelVersion>

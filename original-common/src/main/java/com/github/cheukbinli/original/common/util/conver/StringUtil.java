@@ -477,7 +477,7 @@ public class StringUtil extends ConverType {
     /***
      * 参数剥离
      */
-    static class StripParam {
+    public static class StripParam {
         private String conetnt;
         private List<String> paramNames;
 
