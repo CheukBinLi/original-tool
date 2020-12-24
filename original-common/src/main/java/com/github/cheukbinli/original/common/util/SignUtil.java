@@ -79,9 +79,10 @@ public class SignUtil {
 		if (!StringUtil.isEmpty(key)) {
 			sb.append("key").append(assignmentCharacter).append(key).append(linkCharacter);
 		}
-		if (StringUtil.isEmpty(tail)) {
+		if (sb.length() > 0) {
 			sb.setLength(sb.length() - (null == linkCharacter ? 0 : linkCharacter.length()));
-		} else {
+		}
+		if(!StringUtil.isEmpty(tail)) {
 			sb.append(tail);
 		}
 		if (SignType.MD5.equals(signType)) {
