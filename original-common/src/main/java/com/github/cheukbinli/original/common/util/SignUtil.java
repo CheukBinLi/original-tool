@@ -1,5 +1,6 @@
 package com.github.cheukbinli.original.common.util;
 
+import com.github.cheukbinli.original.common.util.conver.CollectionUtil;
 import com.github.cheukbinli.original.common.util.conver.StringUtil;
 
 import javax.crypto.Mac;
@@ -20,7 +21,7 @@ public class SignUtil {
 	private static final Random RANDOM = new SecureRandom();
 
 	/***
-	 * 
+	 *
 	 * @param data
 	 *            数据集
 	 * @param head
@@ -57,7 +58,7 @@ public class SignUtil {
 			}
 			sb.append(linkCharacter).append(underscoreCamel ? StringUtil.toLowerCaseUnderscoreCamel(k) : k).append(assignmentCharacter).append(value.toString().trim());
 		}
-		return StringUtil.isEmpty(head, "") + (sb.length() > 0 ? sb.substring(linkCharacter.length()) : "") + StringUtil.isEmpty(tail, "");
+		return StringUtil.isEmpty(head, "") + (sb.length() > 0 && CollectionUtil.isNotEmpty(data) ? sb.substring(linkCharacter.length()) : "") + StringUtil.isEmpty(tail, "");
 	}
 
 	public static String generateSignature(final Map<String, Object> data, String head, String tail, SignType signType, String key, String assignmentCharacter, String linkCharacter, boolean underscoreCamel, String... ignores) throws Exception {
@@ -67,7 +68,7 @@ public class SignUtil {
 		assignmentCharacter = null == assignmentCharacter ? "=" : assignmentCharacter;
 		linkCharacter = null == linkCharacter ? "&" : linkCharacter;
 		Arrays.sort(keyArray);
-		StringBuilder sb = new StringBuilder(StringUtil.isEmpty(head, ""));
+		StringBuilder sb = new StringBuilder();
 		Object value;
 		for (String k : keyArray) {
 			// 参数值为空，则不参与签名
@@ -81,6 +82,9 @@ public class SignUtil {
 		}
 		if (sb.length() > 0) {
 			sb.setLength(sb.length() - (null == linkCharacter ? 0 : linkCharacter.length()));
+		}
+		if (!StringUtil.isEmpty(head)) {
+			sb.insert(0, head);
 		}
 		if(!StringUtil.isEmpty(tail)) {
 			sb.append(tail);

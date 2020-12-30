@@ -1,6 +1,7 @@
 package com.github.cheukbinli.original.common.util.net;
 
 import com.github.cheukbinli.original.common.util.conver.CollectionUtil;
+import com.github.cheukbinli.original.common.util.conver.StringUtil;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -187,6 +188,12 @@ public class HttpClientUtil {
 	}
 
 	public HttpResponseModel GET(String urlPath, int timeOut, boolean onlyRequest, boolean onlyResponseData, Map<String, String> header) throws IOException {
+		return GET(urlPath,timeOut,onlyRequest,onlyResponseData,header,"");
+	}
+	public HttpResponseModel GET(String urlPath, int timeOut, boolean onlyRequest, boolean onlyResponseData, Map<String, String> header, Map<Object, Object> params) throws IOException {
+		return GET(urlPath,timeOut,onlyRequest,onlyResponseData,header, StringUtil.assemble("=", params, "&"));
+	}
+	public HttpResponseModel GET(String urlPath, int timeOut, boolean onlyRequest, boolean onlyResponseData, Map<String, String> header,String parameterStr) throws IOException {
 		HttpURLConnection con = null;
 		URL url = null;
 		InputStream in = null;
@@ -209,7 +216,14 @@ public class HttpClientUtil {
 					con.setRequestProperty(item.getKey(), item.getValue());
 				}
 			}
-			con.connect();
+			if (StringUtil.isBlank(parameterStr)) {
+				con.connect();
+			} else {
+				OutputStream outWriter = new DataOutputStream(con.getOutputStream());
+				outWriter.write(parameterStr.getBytes("utf-8"));
+				outWriter.flush();
+				outWriter.close();
+			}
 			result = new HttpResponseModel(con.getResponseCode(), onlyResponseData ? null : con.getHeaderFields(), out = new ByteArrayOutputStream());
 			if (onlyRequest)
 				return result;
