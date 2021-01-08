@@ -6,6 +6,7 @@ import com.github.cheukbinli.original.common.util.reflection.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -75,13 +76,30 @@ public abstract class AbstractHandlerManager<T extends Handler<?>> implements Ha
 					return;
 				isInit = true;
 			}
-			Set<ClassInfo> handlers = ReflectionUtil.instance().findImplementationForSpringBoot(null == getScanPackage() ? this.getClass().getPackage().getName() : getScanPackage(), this.getClass().getClassLoader(), getSuperHandler());
+			Set<ClassInfo> handlers=new HashSet<>();
+
+			try {
+				Set<ClassInfo> defaultHandlers = ReflectionUtil.instance().findImplementation(this.getClass().getClassLoader(), getSuperHandler());
+				handlers.addAll(defaultHandlers);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			try {
+				Set<ClassInfo> springBootHandlers = ReflectionUtil.instance().findImplementationForSpringBoot(null == getScanPackage() ? this.getClass().getPackage().getName() : getScanPackage(), this.getClass().getClassLoader(), getSuperHandler());
+				handlers.addAll(springBootHandlers);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+
 			handlers.forEach(item -> {
 				if (!item.isAbstract()) {
-					try {
-						addHandler(instance((Class<T>) item.getClazz()));
-					} catch (Throwable e) {
-						log.error(e.getMessage(), e);
+                    try {
+                        if (log.isInfoEnabled()) {
+                            log.info("{}->register:{}", this.getClass().getName(), item.getName());
+                        }
+                        addHandler(instance((Class<T>) item.getClazz()));
+                    } catch (Throwable e) {
+                        log.error(e.getMessage(), e);
 					}
 				}
 			});
