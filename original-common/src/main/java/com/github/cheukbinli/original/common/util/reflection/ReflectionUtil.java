@@ -387,13 +387,14 @@ public class ReflectionUtil {
 		Set<String> classes = classMap.get(packagePrefix + ".*$class");
 		final Set<ClassInfo> result = new HashSet<ClassInfo>();
 		classes.forEach(item -> {
-			String className = item.replaceAll("/", ".");
+			String className = item.replaceAll("BOOT-INF/classes/", "").replaceAll("/", ".");
 			try {
 				Class<?> clazz = Class.forName(className.substring(0, className.length() - 6), false, classLoader);
 				if (!parent.equals(clazz) && parent.isAssignableFrom(clazz)) {
 					result.add(ClassInfo.getClassInfo(clazz));
 				}
 			} catch (Throwable e) {
+				e.printStackTrace();
 			}
 		});
 
