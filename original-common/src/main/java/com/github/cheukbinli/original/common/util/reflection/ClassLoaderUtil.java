@@ -58,6 +58,13 @@ public class ClassLoaderUtil {
 		return createClassLoader(parentClassLoader, jars.toArray(new URL[0]));
 	}
 
+	/***
+	 *
+	 * @param parentClassLoader  为null时，默认依赖 ${java.class.path}路径下所有包
+	 * @param jars
+	 * @return
+	 * @throws Exception
+	 */
 	public static ClassLoader createClassLoader(ClassLoader parentClassLoader, URL... jars) throws Exception {
 		if (null != jars)
 			for (URL jar : jars) {
@@ -177,6 +184,19 @@ public class ClassLoaderUtil {
 		Thread.sleep(5000);
 		CountDownLatch c = new CountDownLatch(1);
 		c.await();
+
+		File f11 = new File("D:/SYSTEM/Desktop/1.jar");
+		File f22 = new File("D:/SYSTEM/Desktop/2.jar");
+		System.err.println(f1.toURI().toURL().toString());
+
+		ClassLoader cl1 = ClassLoaderUtil.createClassLoader(null, f11.toURI().toURL());
+		ClassLoader cl2 = ClassLoaderUtil.createClassLoader(null, f22.toURI().toURL());
+
+		Class c1 = cl1.loadClass("com.github.cheukbinli.original.cache.A");
+		Class c2 = cl2.loadClass("com.github.cheukbinli.original.cache.A");
+		c1.newInstance();
+		c2.newInstance();
+
 	}
 
 }
