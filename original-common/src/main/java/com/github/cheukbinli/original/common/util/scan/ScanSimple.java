@@ -150,6 +150,9 @@ public class ScanSimple extends AbstractScan {
 				Enumeration<JarEntry> jars = jarFile.entries();
 				while (jars.hasMoreElements()) {
 					JarEntry jarEntry = jars.nextElement();
+					if (null == jarEntry || jarEntry.isDirectory()) {
+						continue;
+					}
 					// if ((name =
 					// jarEntry.getName()).toLowerCase().endsWith("jar")) {
 					// jarInJar(result, pathPattern,
