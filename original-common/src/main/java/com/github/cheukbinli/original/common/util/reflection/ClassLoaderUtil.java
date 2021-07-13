@@ -30,6 +30,17 @@ public class ClassLoaderUtil {
     // return classLoader;
     // }
 
+    static Method getJarFile ;
+
+    static {
+        try {
+            getJarFile = URLJarFile.class.getDeclaredMethod("getJarFile", URL.class);
+            getJarFile.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static class CustomClassLoader<T> extends URLClassLoader {
 
         private T resource;
@@ -129,12 +140,7 @@ public class ClassLoaderUtil {
         return new CustomClassLoader(urls.toArray(new URL[0]), parentClassLoader);
     }
 
-    static URLJarFile createURLJarFile(URL url) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-//        Constructor<URLJarFile> urlJarFileConstructor= URLJarFile.class.getConstructor(URL.class);
-//        urlJarFileConstructor.setAccessible(true);
-//        return urlJarFileConstructor.newInstance(url);
-        Method getJarFile = URLJarFile.class.getDeclaredMethod("getJarFile", URL.class);
-        getJarFile.setAccessible(true);
+    static URLJarFile createURLJarFile(URL url) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         return (URLJarFile) getJarFile.invoke(null, url);
     }
 
@@ -235,7 +241,7 @@ public class ClassLoaderUtil {
                         continue;
                     item.interrupt();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             }
             thread.setContextClassLoader(parent);
@@ -362,6 +368,7 @@ public class ClassLoaderUtil {
     public static void main(String[] args) throws CacheException, Exception {
 
         ClassLoaderInfo classLoaderInfo = ClassLoaderUtil.createClassLoaderInfo(null, new URL("https://repo1.maven.org/maven2/org/slf4j/jul-to-slf4j/1.7.31/jul-to-slf4j-1.7.31.jar"));
+        Object o=classLoaderInfo.getClassLoader().getResource("META-INF");
         ClassLoaderUtil.destroy(classLoaderInfo.getClassLoader());
         System.out.printf(URLDecoder.decode("https%3A%2F%2Fai-test.bgyfws.com%3A55871%2Failogic"));
         ClassLoader x = new ClassLoader() {

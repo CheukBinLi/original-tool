@@ -137,10 +137,12 @@ public class CronBuilder implements Serializable {
 		Cron cron;
 		switch (periodType) {
 		case 1:
-			cron = CronBuilder.build(date, new IntervalTypeProvider(IntervalType.HOURS, Operation.All, 0, 0), new IntervalTypeProvider(IntervalType.MINUTES, Operation.INTERVAL, date.getMinutes() == 30 ? 0 : date.getMinutes(), 30), new IntervalTypeProvider(IntervalType.SECONDS, Operation.VALUE, 0, 0));
+//			cron = CronBuilder.build(date, new IntervalTypeProvider(IntervalType.HOURS, Operation.All, 0, 0), new IntervalTypeProvider(IntervalType.MINUTES, Operation.INTERVAL, date.getMinutes() == 30 ? 0 : date.getMinutes(), 30), new IntervalTypeProvider(IntervalType.SECONDS, Operation.VALUE, 0, 0));
+			cron = CronBuilder.build(date, new IntervalTypeProvider(IntervalType.HOURS, Operation.All, 0, 0), new IntervalTypeProvider(IntervalType.MINUTES, Operation.INTERVAL, date.getMinutes() == 30 ? 0 : date.getMinutes(), 30));
 			break;
 		case 2:
-			cron = CronBuilder.build(date, new IntervalTypeProvider(IntervalType.HOURS, Operation.INTERVAL, 0, 1), new IntervalTypeProvider(IntervalType.YEAR, Operation.All, 0, 0), new IntervalTypeProvider(IntervalType.YEAR, Operation.All, 0, 0));
+//			cron = CronBuilder.build(date, new IntervalTypeProvider(IntervalType.HOURS, Operation.INTERVAL, 0, 1), new IntervalTypeProvider(IntervalType.YEAR, Operation.All, 0, 0), new IntervalTypeProvider(IntervalType.YEAR, Operation.All, 0, 0));
+			cron = CronBuilder.build(date, new IntervalTypeProvider(IntervalType.HOURS, Operation.INTERVAL, 0, 1), new IntervalTypeProvider(IntervalType.YEAR, Operation.All, 0, 0));
 			break;
 		case 3:
 			cron = CronBuilder.build(date, new IntervalTypeProvider(IntervalType.DAY_OF_WEEK, Operation.PLACEHOLDER, 0, 0), new IntervalTypeProvider(IntervalType.DAY_OF_MONTH, Operation.All, 0, 0), new IntervalTypeProvider(IntervalType.YEAR, Operation.All, 0, 0));

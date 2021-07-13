@@ -478,23 +478,61 @@ public class StringUtil extends ConverType {
      * 参数剥离
      */
     public static class StripParam {
-        private String conetnt;
+        private String content;
         private List<String> paramNames;
+        private Map<String, Object> param;
+        private List<String> contents;
+        private static final String TAG = "@-$";
 
         public StripParam() {
         }
 
-        public StripParam(String conetnt, List<String> paramNames) {
-            this.conetnt = conetnt;
+        public StripParam(String content, List<String> paramNames, List<String> contents, Map<String, Object> param) {
+            this.content = content;
+            this.paramNames = paramNames;
+            this.contents = contents;
+            this.param = param;
+        }
+
+        public StripParam(String content, List<String> paramNames) {
+            this.content = content;
             this.paramNames = paramNames;
         }
 
-        public String getConetnt() {
-            return conetnt;
+        public String rebuildWitchParam() {
+            return rebuild(null);
         }
 
+        public String rebuild(String replaceString) {
+            if (CollectionUtil.isEmpty(contents)) {
+                return content;
+            }
+            StringBuilder result = new StringBuilder();
+            for (String item : contents) {
+                if (StringUtil.isBlank(item)) {
+                    continue;
+                }
+                if (item.startsWith(TAG)) {
+                    result.append(null == replaceString ? param.get(item.substring(TAG.length())) : replaceString);
+                    continue;
+                }
+                result.append(item);
+            }
+            return result.toString();
+        }
+
+        public String getConetnt() {
+            return content;
+        }
+        public String getContent() {
+            return content;
+        }
+
+        public void setContent(String conetnt) {
+            this.content = conetnt;
+        }
         public void setConetnt(String conetnt) {
-            this.conetnt = conetnt;
+            this.content = conetnt;
         }
 
         public List<String> getParamNames() {
@@ -505,9 +543,28 @@ public class StringUtil extends ConverType {
             this.paramNames = paramNames;
         }
 
+        public Map<String, Object> getParam() {
+            return param;
+        }
+
+        public void setParam(Map<String, Object> param) {
+            this.param = param;
+        }
+
+        public List<String> getContents() {
+            return contents;
+        }
+
+        public void setContents(List<String> contents) {
+            this.contents = contents;
+        }
     }
 
     public static StripParam stripParam(Pattern pattern, int prefixLen, int suffixLen, String content) {
+        return stripParam(pattern, prefixLen, suffixLen, content, true);
+    }
+
+    public static StripParam stripParam(Pattern pattern, int prefixLen, int suffixLen, String content, boolean isReplace) {
         if (null == pattern) {
             throw new NullPointerException("pattern can't be null.");
         }
@@ -517,14 +574,28 @@ public class StringUtil extends ConverType {
         StringBuffer result = new StringBuffer();
 
         List<String> paramNames = new ArrayList<>();
-        String paramName;
+        List<String> contents = new ArrayList<>();
+        Map<String, Object> param = new LinkedHashMap<>();
+        String orginParam, paramName;
+        int pre = 0;
         while (matcher.find()) {
-            paramName = matcher.group(0);
-            paramNames.add(paramName.substring(prefixLen, paramName.length() - suffixLen));
-            matcher.appendReplacement(result, "%s");
+            orginParam = matcher.group(0);
+            paramNames.add(paramName = orginParam.substring(prefixLen, orginParam.length() - suffixLen));
+            contents.add(content.substring(pre, matcher.start()));
+            contents.add(StripParam.TAG + paramName);
+            param.put(paramName, orginParam);
+            if(isReplace) {
+                matcher.appendReplacement(result, "%s");
+            }
+            pre = matcher.end();
         }
+        contents.add(content.substring(pre));
         matcher.appendTail(result);
-        return new StripParam(result.toString(), paramNames);
+        return new StripParam(result.toString(), paramNames, contents, param);
+    }
+
+    public static StripParam stripParam(String prefix, String suffix, String content, boolean isReplace) {
+        return stripParam(toRegex(prefix) + "[0-9,a-z,A-Z]+" + toRegex(suffix), prefix.length(), suffix.length(), content,isReplace);
     }
 
     public static StripParam stripParam(String prefix, String suffix, String content) {
@@ -533,6 +604,10 @@ public class StringUtil extends ConverType {
 
     public static StripParam stripParam(String regex, int prefixLen, int suffixLen, String content) {
         return stripParam(Pattern.compile(regex), prefixLen, suffixLen, content);
+    }
+
+    public static StripParam stripParam(String regex, int prefixLen, int suffixLen, String content, boolean isReplace) {
+        return stripParam(Pattern.compile(regex), prefixLen, suffixLen, content,isReplace);
     }
 
 

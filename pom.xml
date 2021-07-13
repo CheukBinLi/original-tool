@@ -183,7 +183,8 @@
         <module>original-qrcode</module>
         <module>original-rmi</module>
         <module>original-spring-plugin</module>
-<!--        <module>original-oauth</module>-->
+        <module>original-sql-parser</module>
+        <!--        <module>original-oauth</module>-->
 <!--         <module>original-oauth-web</module>-->
 <!--        <module>original-spring-boot-starter</module>-->
     </modules>
