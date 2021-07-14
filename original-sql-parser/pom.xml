@@ -5,7 +5,7 @@
     <parent>
         <artifactId>original-tool</artifactId>
         <groupId>com.github.cheukbinli</groupId>
-        <version>1.0.0.3.6-RELEASE</version>
+        <version>1.0.0.3.7-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,7 +16,7 @@
             <dependency>
                 <artifactId>original-depend</artifactId>
                 <groupId>com.github.cheukbinli</groupId>
-                <version>${project.version}</version>
+                <version>${project.parent.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -27,12 +27,12 @@
         <dependency>
             <groupId>com.github.cheukbinli</groupId>
             <artifactId>original-common</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.cheukbinli</groupId>
             <artifactId>original-spring-plugin</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>

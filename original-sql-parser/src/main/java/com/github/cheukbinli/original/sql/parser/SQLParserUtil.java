@@ -2,19 +2,30 @@ package com.github.cheukbinli.original.sql.parser;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLName;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
+import com.alibaba.druid.sql.ast.expr.SQLBinaryOperator;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLSelectGroupByClause;
+import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateTableStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.druid.util.JdbcConstants;
+import com.alibaba.druid.util.StringUtils;
 import com.github.cheukbinli.original.common.util.conver.CollectionUtil;
 import com.github.cheukbinli.original.common.util.conver.ObjectUtil;
 import com.github.cheukbinli.original.common.util.conver.StringUtil;
+import com.github.cheukbinli.original.sql.parser.model.MeatdataInfo;
+import com.github.cheukbinli.original.sql.parser.model.SQLInfo;
+import com.github.cheukbinli.original.sql.parser.model.SQLMetaInfo;
+import com.github.cheukbinli.original.sql.parser.model.content.BaseContent;
+import com.github.cheukbinli.original.sql.parser.model.content.ConditionContent;
+import com.github.cheukbinli.original.sql.parser.model.content.GroupByContent;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -22,6 +33,8 @@ import org.beetl.core.Configuration;
 import org.beetl.core.GroupTemplate;
 import org.beetl.core.Template;
 import org.beetl.core.resource.StringTemplateResourceLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -41,6 +54,8 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public class SQLParserUtil {
+
+    static final Logger LOG = LoggerFactory.getLogger(SQLParserUtil.class);
 
     public final static SQLOrderBy SQL_ORDER_BY = new SQLOrderBy();
 
@@ -155,14 +170,18 @@ public class SQLParserUtil {
                 MySqlSelectQueryBlock queryBlock = (MySqlSelectQueryBlock) statement.getSelect().getQuery();
                 SQLExprTableSource table = (SQLExprTableSource) queryBlock.getFrom();
 
-                tableName = table.getTableName().replace("`", "");
+                tableName = table.getName().getSimpleName().replace("`", "");
 
                 if (!StringUtil.isBlank(groupBy) && tables.contains(finalTableName = StringUtil.assemble("_", tableName, operationType, groupBy))) {
                     if (cleanGroupBy) {
                         groupByClause = queryBlock.getGroupBy().toString();
                         queryBlock.setGroupBy(null);
                     }
-                    table.setSimpleName(finalTableName);
+
+                    SQLName sqlName = table.getName();
+
+//                    table.setSimpleName(finalTableName);
+                    setName(table.getName(), finalTableName);
                     return new SQLInfo(
                             finalTableName,
                             "column",
@@ -195,7 +214,8 @@ public class SQLParserUtil {
                                     queryBlock.setGroupBy(null);
                                 }
                             }
-                            table.setSimpleName(finalTableName);
+//                            table.setSimpleName(finalTableName);
+                            setName(table.getName(), finalTableName);
                             return new SQLInfo(
                                     finalTableName,
                                     "column",
@@ -218,66 +238,69 @@ public class SQLParserUtil {
         if (StringUtil.isBlank(statement)) {
             throw new RuntimeException("statement can't be blank");
         }
-        statement = templateRender(statement, param);
+
         List<SQLInfo> result = new ArrayList<>();
         List<SQLStatement> statementList = SQLUtils.parseStatements(statement, JdbcConstants.MYSQL);
+
         for (SQLStatement item : statementList) {
-            String tableName, finalTableName, groupByClause = null;
+            String tableName = null;
+            SQLMetaInfo metaInfo;
             if (item instanceof SQLSelectStatement) {
                 SQLSelectStatement selectStatement = (SQLSelectStatement) item;
                 MySqlSelectQueryBlock queryBlock = (MySqlSelectQueryBlock) selectStatement.getSelect().getQuery();
+
                 SQLExprTableSource table = (SQLExprTableSource) queryBlock.getFrom();
-
-                SQLSelectGroupByClause group = queryBlock.getGroupBy();
-                group = null == group ? new SQLSelectGroupByClause() : group;
-                group.setParen(true);
-                group.setParent(queryBlock);
-//                queryBlock.setGroupBy(new SQLSelectGroupByClause());
-                queryBlock.setGroupBy(group);
-
-                List<SQLExpr> orginSqlPropertyExprs = new ArrayList<>(group.getItems());
-
                 String tableAlias = StringUtil.isBlank(table.getAlias()) ? null : table.getAlias().replace(".", "");
                 if (StringUtil.isBlank(tableAlias)) {
                     table.setAlias(tableAlias = DEFAULT_TABLE_ALIAS_NAME);
                 }
 
+                tableName = table.getName().getSimpleName().replace("`", "");
+                metaInfo = new SQLMetaInfo(tableName, tableAlias);
+
                 for (MeatdataInfo operationType : operationTypes) {
+
+                    MySqlSelectQueryBlock newQueryBlock = processHandler(queryBlock, false, metaInfo, null);
+                    SQLSelectGroupByClause group = newQueryBlock.getGroupBy();
+                    group = null == group ? new SQLSelectGroupByClause() : group;
+
+                    group.setParent(newQueryBlock);
+                    newQueryBlock.setGroupBy(group);
+                    newQueryBlock = processHandler(newQueryBlock, true, metaInfo, operationType.getContent());
+                    List<SQLExpr> orginSqlPropertyExprs = new ArrayList<>(group.getItems());
+
+                    List<SQLSelectItem> orginColumns = new ArrayList<>(newQueryBlock.getSelectList());
+                    SQLExpr orginWhere = newQueryBlock.getWhere();
+
+
                     for (MeatdataInfo groupBy : groupBys) {
                         group.getItems().clear();
-                        for (String operationTypeValue : operationType.getContent()) {
-                            SQLPropertyExpr operationTypePropertyExpr = new SQLPropertyExpr();
-                            operationTypePropertyExpr.setName(operationTypeValue);
-                            operationTypePropertyExpr.setOwner(tableAlias);
-
-//                            SQLIdentifierExpr sqlIdentifierExpr=new SQLIdentifierExpr();
-//                            sqlIdentifierExpr.setName(tableAlias);
-//                            sqlIdentifierExpr.setParent(operationTypePropertyExpr);
-
-//                            operationTypePropertyExpr.setOwner(sqlIdentifierExpr);
-                            operationTypePropertyExpr.setParent(group);
-                            group.getItems().add(operationTypePropertyExpr);
+                        if (CollectionUtil.isNotEmpty(orginSqlPropertyExprs)) {
+                            group.getItems().addAll(orginSqlPropertyExprs);
                         }
-                        for (String groupByValue : groupBy.getContent()) {
-                            SQLPropertyExpr groupByPropertyExpr = new SQLPropertyExpr();
-                            groupByPropertyExpr.setName(groupByValue);
-                            groupByPropertyExpr.setOwner(tableAlias);
-                            groupByPropertyExpr.setParent(group);
-                            group.getItems().add(groupByPropertyExpr);
-                        }
-                        group.getItems().addAll(orginSqlPropertyExprs);
+                        newQueryBlock.setWhere(null == orginWhere ? null : orginWhere.clone());
+                        newQueryBlock.getSelectList().clear();
+                        newQueryBlock.getSelectList().addAll(orginColumns);
 
-                        StringUtil.StripParam stripParam = StringUtil.stripParam("#{", "}", queryBlock.toString(), false);
+                        if (CollectionUtil.isNotEmpty(groupBy.getContent())) {
+                            processHandler(newQueryBlock, true, metaInfo, groupBy.getContent());
+                        }
+
+                        Map<String, Object> currentParam = CollectionUtil.collage(param, groupBy.getAdditionalParams(), operationType.getAdditionalParams());
+                        //SQL重建
+                        statement = templateRender(newQueryBlock.toString(), currentParam);
+
+                        StringUtil.StripParam stripParam = StringUtil.stripParam("#{", "}", newQueryBlock.toString(), false);
                         String sql = stripParam.rebuild("?");
-                        LinkedHashMap<String, Object> resultParam = null;
+                        Map<String, Object> resultParam = Collections.EMPTY_MAP;
                         if (CollectionUtil.isNotEmpty(stripParam.getParam())) {
                             resultParam = new LinkedHashMap<>();
                             for (String paramItem : stripParam.getParam().keySet()) {
-                                resultParam.put(paramItem, param.get(paramItem));
+                                resultParam.put(paramItem, currentParam.get(paramItem));
                             }
                         }
 
-                        result.add(new SQLInfo(statement, sql, resultParam));
+                        result.add(new SQLInfo(statement, sql, operationType.getName(), groupBy.getName(), resultParam));
                     }
 
                 }
@@ -287,20 +310,38 @@ public class SQLParserUtil {
 
     }
 
+    /***
+     *
+     * @param connection 数据连接
+     * @param statement 原sql
+     * @param operationTypes 统计参数集1
+     * @param groupBys 统计参数集2
+     * @param param 查询参数
+     * @param iterator 迭代器返回null时，结果集不与收录（降低内存使用量）
+     * @param <T>
+     * @return
+     * @throws SQLException
+     */
     public static <T> List<List<T>> doSelect(Connection connection, String statement, MeatdataInfo[] operationTypes, MeatdataInfo[] groupBys, Map<String, Object> param, DataIterator<T> iterator) throws SQLException {
+        return doSelect(connection, statement, operationTypes, groupBys, param, iterator, null);
+    }
+
+    public static <T> List<List<T>> doSelect(Connection connection, String statement, MeatdataInfo[] operationTypes, MeatdataInfo[] groupBys, Map<String, Object> param, DataIterator<T> iterator, SQLParserFactoryListener listener) throws SQLException {
         List<SQLInfo> sqlInfoList = select(statement, operationTypes, groupBys, param);
         List<List<T>> result = new ArrayList<>();
         for (SQLInfo item : sqlInfoList) {
-
-            StringUtil.StripParam stripParam = StringUtil.stripParam("#{", "}", item.getSql(), false);
-            String sql = stripParam.rebuild("?");
+            if (LOG.isInfoEnabled()) {
+                LOG.info(item.getSql());
+            }
 
             PreparedStatement preparedStatement = connection.prepareStatement(item.getSql());
-
-            if (CollectionUtil.isNotEmpty(stripParam.getParamNames())) {
-                List<String> paramNames = stripParam.getParamNames();
-                for (int i = 0, len = stripParam.getParamNames().size(); i < len; i++) {
-                    preparedStatement.setObject(i + 1, param.get(paramNames.get(i)));
+            if (null != listener) {
+                listener.doEvent("SELECT", item.getSql(), item.getParam());
+            }
+            if (CollectionUtil.isNotEmpty(item.getParam())) {
+                int i = 0;
+                for (Map.Entry<String, Object> entry : item.getParam().entrySet()) {
+                    preparedStatement.setObject(++i, entry.getValue());
                 }
             }
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -319,14 +360,14 @@ public class SQLParserUtil {
                 for (String column : columns) {
                     row.put(column, resultSet.getObject(column));
                 }
-                if (null == (t = iterator.next(row))) {
+                if (null == (t = iterator.next(row, item.getOperationName(), item.getGroupName(), preparedStatement.getParameterMetaData()))) {
                     continue;
                 }
                 subResult.add(t);
             }
-            if (CollectionUtil.isEmpty(subResult)) {
-                continue;
-            }
+//            if (CollectionUtil.isEmpty(subResult)) {
+//                continue;
+//            }
             result.add(subResult);
         }
         return result;
@@ -339,12 +380,13 @@ public class SQLParserUtil {
             String tableName = null;
             if (item instanceof MySqlCreateTableStatement) {
                 MySqlCreateTableStatement createTableStatement = (MySqlCreateTableStatement) item;
-                tableName = createTableStatement.getTableName();
+                tableName = createTableStatement.getName().getSimpleName();
                 tableName = tableName.substring(tableName.startsWith("`") ? 1 : 0, tableName.endsWith("`") ? tableName.length() - 1 : tableName.length());
 
                 for (String operationType : operationTypes) {
                     for (String groutBy : groupBys) {
-                        createTableStatement.setTableName("`" + StringUtil.assemble("_", tableName, operationType, groutBy) + "`");
+//                        createTableStatement.setTableName("`" + StringUtil.assemble("_", tableName, operationType, groutBy) + "`");
+                        setName(createTableStatement.getName(), "`" + StringUtil.assemble("_", tableName, operationType, groutBy) + "`");
                         result.add(new SQLInfo(statement, createTableStatement.toString(), null));
                     }
                 }
@@ -364,9 +406,9 @@ public class SQLParserUtil {
         try {
             connection.setAutoCommit(false);
 
-            List<SQLParserUtil.SQLInfo> sqlInfoList = SQLParserUtil.create(statement, operationTypes, groupBys);
+            List<SQLInfo> sqlInfoList = SQLParserUtil.create(statement, operationTypes, groupBys);
             String sql;
-            for (SQLParserUtil.SQLInfo item : sqlInfoList) {
+            for (SQLInfo item : sqlInfoList) {
                 sql = item.getSql();
                 sql = listener.doEvent("CREATE", sql).verifyContent(sql);
                 PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -382,6 +424,82 @@ public class SQLParserUtil {
         } finally {
             connection.setAutoCommit(autoCommit);
         }
+
+    }
+
+    static MySqlSelectQueryBlock processHandler(MySqlSelectQueryBlock queryBlock, boolean isSingleInstance, SQLMetaInfo metaInfo, List<BaseContent> contents) {
+        if (null == queryBlock) {
+            throw new NullPointerException("queryBlock can't be null.");
+        }
+        MySqlSelectQueryBlock result = isSingleInstance ? queryBlock : queryBlock.clone();
+        if (CollectionUtil.isEmpty(contents)) {
+            return result;
+        }
+        if (null == metaInfo || StringUtil.isBlank(metaInfo.getTableName())) {
+            SQLExprTableSource table = (SQLExprTableSource) result.getFrom();
+            String tableAlias = StringUtil.isBlank(table.getAlias()) ? null : table.getAlias().replace(".", "");
+            if (StringUtil.isBlank(tableAlias)) {
+                table.setAlias(tableAlias = DEFAULT_TABLE_ALIAS_NAME);
+            }
+            String tableName = table.getName().getSimpleName().replace("`", "");
+            metaInfo = new SQLMetaInfo(tableName, tableAlias);
+        }
+
+        for (BaseContent contentItem : contents) {
+            switch (contentItem.getType()) {
+                case COLUMN:
+                    List<SQLSelectItem> columns = result.getSelectList();
+                    String column = (String) contentItem.getValue();
+                    if (StringUtil.isBlank(column)) {
+                        break;
+                    }
+                    columns.add(new SQLSelectItem(new SQLIdentifierExpr(column)));
+                    break;
+                case CONDITION:
+                    ConditionContent condition = (ConditionContent) contentItem;
+                    if (null == condition) {
+                        break;
+                    }
+                    SQLBinaryOpExpr where = (SQLBinaryOpExpr) result.getWhere();
+
+                    SQLIdentifierExpr key = new SQLIdentifierExpr(condition.getName());
+                    SQLIdentifierExpr value = new SQLIdentifierExpr(condition.getValue());
+                    SQLBinaryOpExpr link = new SQLBinaryOpExpr(key, SQLBinaryOperator.valueOf(condition.getOperator().toString()), value);
+
+                    if (null == where) {
+                        result.setWhere(link);
+                    } else {
+                        where.setRight(new SQLBinaryOpExpr(where.getRight(), SQLBinaryOperator.valueOf(condition.getLeftOperator().toString()), link));
+                    }
+                    break;
+                case GROUP_BY:
+                    GroupByContent groupBy = (GroupByContent) contentItem;
+                    if (CollectionUtil.isEmpty(groupBy)) {
+                        break;
+                    }
+//                    SQLSelectGroupByClause parent = null != metaInfo && metaInfo.getParent() instanceof SQLSelectGroupByClause ? metaInfo.getParent() : result.getGroupBy();
+                    SQLSelectGroupByClause parent = result.getGroupBy();
+                    if (null == parent) {
+                        parent = new SQLSelectGroupByClause();
+                        parent.setParent(result);
+                        result.setGroupBy(parent);
+                    }
+                    for (String groupByValue : groupBy.getValue()) {
+                        SQLPropertyExpr groupByPropertyExpr = new SQLPropertyExpr();
+                        groupByPropertyExpr.setName(groupByValue);
+                        groupByPropertyExpr.setOwner(metaInfo.getAliasName());
+                        groupByPropertyExpr.setParent(parent);
+                        parent.getItems().add(groupByPropertyExpr);
+                    }
+                    break;
+                case ORDER_BY:
+                    break;
+                default:
+                    break;
+            }
+//            processHandler(result, true, metaInfo, metaItem.getChild());
+        }
+        return result;
 
     }
 
@@ -422,27 +540,22 @@ public class SQLParserUtil {
     }
 
     public interface DataIterator<T> {
-        default T next(Map<String, Object> data) {
+        default T next(Map<String, Object> data, String operationName, String groupName, Object params) {
             return (T) data;
         }
     }
 
-//    static SQLInfo create(String statement, String... operationType) {
-//        List<SQLStatement> statementList = SQLUtils.parseStatements(statement, JdbcConstants.MYSQL);
-//        for (SQLStatement item:statementList)
-//        if (item instanceof MySqlUpdateStatement) {
-//            MySqlUpdateStatement statement = (MySqlUpdateStatement) item;
-//        } else if (item instanceof MySqlInsertStatement) {
-//            MySqlInsertStatement statement = (MySqlInsertStatement) item;
-//        } else if (item instanceof SQLAlterTableStatement) {
-//            SQLAlterTableStatement statement = (SQLAlterTableStatement) item;
-//        } else if (item instanceof MySqlCreateTableStatement) {
-//            MySqlCreateTableStatement statement = (MySqlCreateTableStatement) item;
-//        } else {
-//            throw new RuntimeException("not support " + item.getClass());
-//        }
-//    }
-
+    static void setName(SQLName sqlName, String name) {
+        if (StringUtils.isEmpty(name)) {
+            throw new IllegalArgumentException("schema is empty.");
+        } else {
+            if (sqlName instanceof SQLPropertyExpr) {
+                ((SQLPropertyExpr) sqlName).setName(name);
+            } else {
+                ((SQLIdentifierExpr) sqlName).setName(name);
+            }
+        }
+    }
 
     public static void main(String[] args) {
         SQLInfo sqlInfo = selectByChooseTable(new HashSet<>(Arrays.asList("A_day_cc", "A_mon_cc")), "SELECT (Select B.a FROM MMX B) aa,A.* FROM A a WHERE A.id=11 and A.del=0 And A.c=11 group by a.cc;update a set a.a=1 where a.id =11;", "day", true, null);
@@ -461,199 +574,18 @@ public class SQLParserUtil {
             System.out.println("########################");
         }
 
-        List<SQLInfo> sqlInfos1 = select("SELECT (Select B.a FROM MMX B) aa,A.* FROM A a WHERE A.id=11 and A.del=0 And A.c=11 group by a.cc",
-                new MeatdataInfo[]{new MeatdataInfo("mon", Arrays.asList("mon")),
-                        new MeatdataInfo("year", Arrays.asList("year")), new MeatdataInfo("day", Arrays.asList("day"))},
-                new MeatdataInfo[]{new MeatdataInfo("XX1", Arrays.asList("bbx"))},
-                null);
-
-        for (SQLInfo item : sqlInfos1) {
-            System.out.println("************************");
-            System.out.println(item.getSql());
-            System.out.println("************************");
-        }
+//        List<SQLInfo> sqlInfos1 = select("SELECT (Select B.a FROM MMX B) aa,A.* FROM A a WHERE A.id=11 and A.del=0 And A.c=11 group by a.cc",
+//                new MeatdataInfo[]{new MeatdataInfo("mon", Arrays.asList("mon")),
+//                        new MeatdataInfo("year", Arrays.asList("year")), new MeatdataInfo("day", Arrays.asList("day"))},
+//                new MeatdataInfo[]{new MeatdataInfo("XX1", Arrays.asList("bbx"))},
+//                null);
+//
+//        for (SQLInfo item : sqlInfos1) {
+//            System.out.println("************************");
+//            System.out.println(item.getSql());
+//            System.out.println("************************");
+//        }
     }
 
-    public static class MeatdataInfo implements Serializable {
-
-        private static final long serialVersionUID = -6446218504234876544L;
-
-        public enum MetaDataType {COLUMN, CONDITION, GROUP_BY, ORDER_BY}
-
-        public MeatdataInfo(String name, List<String> content) {
-            this(name, null, content, null);
-        }
-
-        public MeatdataInfo(String name, String alias, List<String> content) {
-            this(name, alias, content, null);
-        }
-
-        public MeatdataInfo(String name, String alias, List<String> content, MetaDataType metaDataType) {
-            this.name = name;
-            this.alias = alias;
-            this.content = content;
-            this.metaDataType = metaDataType;
-        }
-
-        /***
-         * 表命名键值
-         */
-        private String name;
-        /***
-         * 别名
-         */
-        private String alias;
-        /***
-         * SQL拼接值
-         */
-        private List<String> content;
-        /***
-         * 元素类型
-         */
-        private MetaDataType metaDataType;
-        /***
-         * 辅助链
-         */
-        private MeatdataInfo child;
-        /***
-         * 辅助链
-         */
-        private MeatdataInfo parent;
-
-
-        public String getName() {
-            return name;
-        }
-
-        public MeatdataInfo setName(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public String getAlias() {
-            return alias;
-        }
-
-        public MeatdataInfo setAlias(String alias) {
-            this.alias = alias;
-            return this;
-        }
-
-        public List<String> getContent() {
-            return content;
-        }
-
-        public MeatdataInfo setContent(List<String> content) {
-            this.content = content;
-            return this;
-        }
-
-        public MetaDataType getMetaDataType() {
-            return metaDataType;
-        }
-
-        public MeatdataInfo setMetaDataType(MetaDataType metaDataType) {
-            this.metaDataType = metaDataType;
-            return this;
-        }
-
-        public MeatdataInfo getChild() {
-            return child;
-        }
-
-        public MeatdataInfo setChild(MeatdataInfo child) {
-            this.child = child;
-            return this;
-        }
-
-        public MeatdataInfo getParent() {
-            return parent;
-        }
-
-        public MeatdataInfo setParent(MeatdataInfo parent) {
-            this.parent = parent;
-            return this;
-        }
-    }
-
-    public static class SQLInfo implements Serializable {
-
-        private static final long serialVersionUID = 3122512942260594875L;
-        private String tableName;
-        private String columns;
-        private String orderBy;
-        private String where;
-        private String groupBy;
-        private String originSql;
-        private String sql;
-        private Map<String, Object> param;
-
-        public SQLInfo() {
-        }
-
-        public SQLInfo(String originSql, String sql, Map<String, Object> param) {
-            this.originSql = originSql;
-            this.sql = sql;
-            this.param = param;
-        }
-
-        public SQLInfo(String tableName, String columns, String where, String groupBy, String orderBy, String originSql, String sql, Map<String, Object> param) {
-            this.tableName = tableName;
-            this.columns = columns;
-            this.orderBy = orderBy;
-            this.where = where;
-            this.originSql = originSql;
-            this.sql = sql;
-            this.param = param;
-        }
-
-        public String getTableName() {
-            return tableName;
-        }
-
-        public void setTableName(String tableName) {
-            this.tableName = tableName;
-        }
-
-        public String getColumns() {
-            return columns;
-        }
-
-        public void setColumns(String columns) {
-            this.columns = columns;
-        }
-
-        public String getOrderBy() {
-            return orderBy;
-        }
-
-        public void setOrderBy(String orderBy) {
-            this.orderBy = orderBy;
-        }
-
-        public String getWhere() {
-            return where;
-        }
-
-        public void setWhere(String where) {
-            this.where = where;
-        }
-
-        public String getOriginSql() {
-            return originSql;
-        }
-
-        public void setOriginSql(String originSql) {
-            this.originSql = originSql;
-        }
-
-        public String getSql() {
-            return sql;
-        }
-
-        public void setSql(String sql) {
-            this.sql = sql;
-        }
-    }
 
 }
