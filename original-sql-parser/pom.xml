@@ -27,12 +27,7 @@
         <dependency>
             <groupId>com.github.cheukbinli</groupId>
             <artifactId>original-common</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.cheukbinli</groupId>
-            <artifactId>original-spring-plugin</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
