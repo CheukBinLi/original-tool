@@ -11,8 +11,9 @@ public class SQLInfo implements Serializable {
     private String orderBy;
     private String where;
     private String groupBy;
-    private String originSql;
-    private String sql;
+    private String originSQL;
+    private String rebuildSQL;
+    private String finalSQL;
     private String operationName;
     private String groupName;
     private Map<String, Object> param;
@@ -20,28 +21,32 @@ public class SQLInfo implements Serializable {
     public SQLInfo() {
     }
 
-    public SQLInfo(String originSql, String sql, Map<String, Object> param) {
-        this.originSql = originSql;
-        this.sql = sql;
+    public SQLInfo(String originSQL, String rebuildSQL, String finalSQL, Map<String, Object> param) {
+        this.originSQL = originSQL;
+        this.finalSQL = finalSQL;
         this.param = param;
+        this.rebuildSQL = rebuildSQL;
     }
 
-    public SQLInfo(String originSql, String sql, String operationName, String groupName, Map<String, Object> param) {
-        this.originSql = originSql;
-        this.sql = sql;
+    public SQLInfo(String originSQL, String rebuildSQL, String finalSQL, String operationName, String groupName, Map<String, Object> param) {
+        this.originSQL = originSQL;
+        this.finalSQL = finalSQL;
         this.param = param;
         this.operationName = operationName;
         this.groupName = groupName;
+        this.rebuildSQL = rebuildSQL;
     }
 
-    public SQLInfo(String tableName, String columns, String where, String groupBy, String orderBy, String originSql, String sql, Map<String, Object> param) {
+    public SQLInfo(String tableName, String columns, String where, String groupBy, String orderBy, String originSQL, String rebuildSQL, String finalSQL, Map<String, Object> param) {
         this.tableName = tableName;
         this.columns = columns;
         this.orderBy = orderBy;
         this.where = where;
-        this.originSql = originSql;
-        this.sql = sql;
+        this.originSQL = originSQL;
+        this.finalSQL = finalSQL;
         this.param = param;
+        this.groupBy = groupBy;
+        this.rebuildSQL = rebuildSQL;
     }
 
     public String getTableName() {
@@ -76,20 +81,21 @@ public class SQLInfo implements Serializable {
         this.where = where;
     }
 
-    public String getOriginSql() {
-        return originSql;
+    public String getOriginSQL() {
+        return originSQL;
     }
 
-    public void setOriginSql(String originSql) {
-        this.originSql = originSql;
+    public void setOriginSQL(String originSQL) {
+        this.originSQL = originSQL;
     }
 
-    public String getSql() {
-        return sql;
+    public String getFinalSQL() {
+        return finalSQL;
     }
 
-    public void setSql(String sql) {
-        this.sql = sql;
+    public SQLInfo setFinalSQL(String finalSQL) {
+        this.finalSQL = finalSQL;
+        return this;
     }
 
     public String getGroupBy() {
@@ -104,8 +110,17 @@ public class SQLInfo implements Serializable {
         return param;
     }
 
-    public void setParam(Map<String, Object> param) {
+    public SQLInfo setParam(Map<String, Object> param) {
         this.param = param;
+        return this;
+    }
+
+    public String getRebuildSQL() {
+        return rebuildSQL;
+    }
+
+    public void setRebuildSQL(String rebuildSQL) {
+        this.rebuildSQL = rebuildSQL;
     }
 
     public String getOperationName() {

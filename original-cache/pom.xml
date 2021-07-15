@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.github.cheukbinli</groupId>
         <artifactId>original-tool</artifactId>
-        <version>1.0.0.3.6-RELEASE</version>
+        <version>1.0.0.3.7-RELEASE</version>
     </parent>
     <artifactId>original-cache</artifactId>
     <name>original-cache</name>

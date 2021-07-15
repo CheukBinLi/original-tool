@@ -595,11 +595,11 @@ public class StringUtil extends ConverType {
     }
 
     public static StripParam stripParam(String prefix, String suffix, String content, boolean isReplace) {
-        return stripParam(toRegex(prefix) + "[0-9,a-z,A-Z]+" + toRegex(suffix), prefix.length(), suffix.length(), content,isReplace);
+        return stripParam(toRegex(prefix) + "[0-9,a-z,A-Z,_]+" + toRegex(suffix), prefix.length(), suffix.length(), content,isReplace);
     }
 
     public static StripParam stripParam(String prefix, String suffix, String content) {
-        return stripParam(toRegex(prefix) + "[0-9,a-z,A-Z]+" + toRegex(suffix), prefix.length(), suffix.length(), content);
+        return stripParam(toRegex(prefix) + "[0-9,a-z,A-Z,_]+" + toRegex(suffix), prefix.length(), suffix.length(), content);
     }
 
     public static StripParam stripParam(String regex, int prefixLen, int suffixLen, String content) {

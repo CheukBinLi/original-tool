@@ -63,6 +63,9 @@ public class SQLParserUtil {
 
     private final static String DEFAULT_TABLE_ALIAS_NAME = "ABC";
 
+    private final static DataIterator DEFAULT_DATA_ITERATOR = new DataIterator() {
+    };
+
     final static StringTemplateResourceLoader RESOURCE_LOADER = new StringTemplateResourceLoader();
     static GroupTemplate groupTemplate;
 
@@ -152,16 +155,6 @@ public class SQLParserUtil {
     public static SQLInfo selectByChooseTable(Set<String> tables, String statments, String operationType, String groupBy, boolean cleanGroupBy, Map<String, Object> param) {
         statments = templateRender(statments, param);
 
-        StringUtil.StripParam stripParam = StringUtil.stripParam("#{", "}", statments, false);
-        statments = stripParam.rebuild("?");
-        LinkedHashMap<String, Object> resultParam = null;
-        if (CollectionUtil.isNotEmpty(stripParam.getParam())) {
-            resultParam = new LinkedHashMap<>();
-            for (String paramItem : stripParam.getParam().keySet()) {
-                resultParam.put(paramItem, param.get(paramItem));
-            }
-        }
-
         List<SQLStatement> statementList = SQLUtils.parseStatements(statments, JdbcConstants.MYSQL);
         for (SQLStatement item : statementList) {
             String tableName, finalTableName, groupByClause = null;
@@ -173,24 +166,25 @@ public class SQLParserUtil {
                 tableName = table.getName().getSimpleName().replace("`", "");
 
                 if (!StringUtil.isBlank(groupBy) && tables.contains(finalTableName = StringUtil.assemble("_", tableName, operationType, groupBy))) {
-                    if (cleanGroupBy) {
+                    if (cleanGroupBy && null != queryBlock.getGroupBy()) {
                         groupByClause = queryBlock.getGroupBy().toString();
                         queryBlock.setGroupBy(null);
                     }
 
-                    SQLName sqlName = table.getName();
-
 //                    table.setSimpleName(finalTableName);
                     setName(table.getName(), finalTableName);
+                    String rebuildSQL = queryBlock.toString();
+                    SQLInfo finalSQL = buildFinalSQL(rebuildSQL, param);
                     return new SQLInfo(
                             finalTableName,
-                            "column",
+                            null,
                             ObjectUtil.defaultNull(queryBlock.getWhere(), SQL_ORDER_BY).toString(),
                             groupByClause,
                             ObjectUtil.defaultNull(queryBlock.getOrderBy(), SQL_ORDER_BY).toString(),
                             statments,
-                            queryBlock.toString(),
-                            resultParam
+                            rebuildSQL,
+                            finalSQL.getFinalSQL(),
+                            finalSQL.getParam()
                     );
                 }
 
@@ -216,25 +210,28 @@ public class SQLParserUtil {
                             }
 //                            table.setSimpleName(finalTableName);
                             setName(table.getName(), finalTableName);
+                            String rebuildSQL = queryBlock.toString();
+                            SQLInfo finalSQL = buildFinalSQL(rebuildSQL, param);
                             return new SQLInfo(
                                     finalTableName,
-                                    "column",
+                                    null,
                                     ObjectUtil.defaultNull(queryBlock.getWhere(), SQL_ORDER_BY).toString(),
                                     groupByClause,
                                     ObjectUtil.defaultNull(queryBlock.getOrderBy(), SQL_ORDER_BY).toString(),
                                     statments,
-                                    queryBlock.toString(),
-                                    resultParam
+                                    rebuildSQL,
+                                    finalSQL.getFinalSQL(),
+                                    finalSQL.getParam()
                             );
                         }
                     }
                 }
             }
         }
-        return new SQLInfo(statments, statments, resultParam);
+        return new SQLInfo(statments, statments, statments, param);
     }
 
-    public static List<SQLInfo> select(String statement, MeatdataInfo[] operationTypes, MeatdataInfo[] groupBys, Map<String, Object> param) {
+    public static List<SQLInfo> select(String statement, MeatdataInfo[] operationTypes, MeatdataInfo[] groupBys, List<BaseContent> baseContents, Map<String, Object> param) {
         if (StringUtil.isBlank(statement)) {
             throw new RuntimeException("statement can't be blank");
         }
@@ -257,6 +254,8 @@ public class SQLParserUtil {
 
                 tableName = table.getName().getSimpleName().replace("`", "");
                 metaInfo = new SQLMetaInfo(tableName, tableAlias);
+
+                queryBlock = processHandler(queryBlock, true, metaInfo, baseContents);
 
                 for (MeatdataInfo operationType : operationTypes) {
 
@@ -286,21 +285,13 @@ public class SQLParserUtil {
                             processHandler(newQueryBlock, true, metaInfo, groupBy.getContent());
                         }
 
-                        Map<String, Object> currentParam = CollectionUtil.collage(param, groupBy.getAdditionalParams(), operationType.getAdditionalParams());
+                        Map<String, Object> currentParam = CollectionUtil.collage(param, operationType.getAdditionalParams(), groupBy.getAdditionalParams());
                         //SQL重建
                         statement = templateRender(newQueryBlock.toString(), currentParam);
+                        String rebuildSQL = newQueryBlock.toString();
+                        SQLInfo finalSQL = buildFinalSQL(rebuildSQL, currentParam);
 
-                        StringUtil.StripParam stripParam = StringUtil.stripParam("#{", "}", newQueryBlock.toString(), false);
-                        String sql = stripParam.rebuild("?");
-                        Map<String, Object> resultParam = Collections.EMPTY_MAP;
-                        if (CollectionUtil.isNotEmpty(stripParam.getParam())) {
-                            resultParam = new LinkedHashMap<>();
-                            for (String paramItem : stripParam.getParam().keySet()) {
-                                resultParam.put(paramItem, currentParam.get(paramItem));
-                            }
-                        }
-
-                        result.add(new SQLInfo(statement, sql, operationType.getName(), groupBy.getName(), resultParam));
+                        result.add(new SQLInfo(statement, rebuildSQL, finalSQL.getFinalSQL(), operationType.getName(), groupBy.getName(), finalSQL.getParam()));
                     }
 
                 }
@@ -322,21 +313,39 @@ public class SQLParserUtil {
      * @return
      * @throws SQLException
      */
-    public static <T> List<List<T>> doSelect(Connection connection, String statement, MeatdataInfo[] operationTypes, MeatdataInfo[] groupBys, Map<String, Object> param, DataIterator<T> iterator) throws SQLException {
-        return doSelect(connection, statement, operationTypes, groupBys, param, iterator, null);
+    public static <T> Map<String, List<T>> doSelect(Connection connection, String statement, MeatdataInfo[] operationTypes, MeatdataInfo[] groupBys, Map<String, Object> param, DataIterator<T> iterator) throws SQLException {
+        return doSelect(connection, statement, operationTypes, groupBys, null, param, iterator, null);
     }
 
-    public static <T> List<List<T>> doSelect(Connection connection, String statement, MeatdataInfo[] operationTypes, MeatdataInfo[] groupBys, Map<String, Object> param, DataIterator<T> iterator, SQLParserFactoryListener listener) throws SQLException {
-        List<SQLInfo> sqlInfoList = select(statement, operationTypes, groupBys, param);
-        List<List<T>> result = new ArrayList<>();
+    /***
+     *
+     * @param connection 连接dataSource.getConnection()
+     * @param statement SQL
+     * @param operationTypes 分组规则1
+     * @param groupBys 分组规则2
+     * @param baseContents 公共变量
+     * @param param 执行参数
+     * @param iterator 记录迭代器
+     * @param listener 执行监听器
+     * @param <T>
+     * @return
+     * @throws SQLException
+     */
+    public static <T> Map<String, List<T>> doSelect(Connection connection, String statement, MeatdataInfo[] operationTypes, MeatdataInfo[] groupBys, List<BaseContent> baseContents, Map<String, Object> param, DataIterator<T> iterator, SQLParserFactoryListener listener) throws SQLException {
+        iterator = null == iterator ? DEFAULT_DATA_ITERATOR : iterator;
+        List<SQLInfo> sqlInfoList = select(statement, operationTypes, groupBys, baseContents, param);
+        Map<String, List<T>> result = new HashMap<>();
         for (SQLInfo item : sqlInfoList) {
+            if (!iterator.isExecute(item.getOperationName(), item.getGroupName(), item.getFinalSQL(), item.getParam())) {
+                continue;
+            }
             if (LOG.isInfoEnabled()) {
-                LOG.info(item.getSql());
+                LOG.info(item.getFinalSQL());
             }
 
-            PreparedStatement preparedStatement = connection.prepareStatement(item.getSql());
+            PreparedStatement preparedStatement = connection.prepareStatement(item.getFinalSQL());
             if (null != listener) {
-                listener.doEvent("SELECT", item.getSql(), item.getParam());
+                listener.doEvent("SELECT", item.getFinalSQL(), item.getParam());
             }
             if (CollectionUtil.isNotEmpty(item.getParam())) {
                 int i = 0;
@@ -368,7 +377,7 @@ public class SQLParserUtil {
 //            if (CollectionUtil.isEmpty(subResult)) {
 //                continue;
 //            }
-            result.add(subResult);
+            result.put(item.getOperationName() + "_" + item.getGroupName(), subResult);
         }
         return result;
     }
@@ -387,7 +396,7 @@ public class SQLParserUtil {
                     for (String groutBy : groupBys) {
 //                        createTableStatement.setTableName("`" + StringUtil.assemble("_", tableName, operationType, groutBy) + "`");
                         setName(createTableStatement.getName(), "`" + StringUtil.assemble("_", tableName, operationType, groutBy) + "`");
-                        result.add(new SQLInfo(statement, createTableStatement.toString(), null));
+                        result.add(new SQLInfo(statement, null, createTableStatement.toString(), null));
                     }
                 }
             }
@@ -400,6 +409,16 @@ public class SQLParserUtil {
         return doCreate(connection, statement, operationTypes, groupBys, null);
     }
 
+    /***
+     *
+     * @param connection 连接dataSource.getConnection()
+     * @param statement  SQL
+     * @param operationTypes 分组类型1
+     * @param groupBys 分组类型2
+     * @param listener 事件侦听
+     * @return
+     * @throws SQLException
+     */
     public static int doCreate(Connection connection, String statement, String[] operationTypes, String[] groupBys, SQLParserFactoryListener listener) throws SQLException {
         boolean autoCommit = connection.getAutoCommit();
         listener = null == listener ? SQLParserFactoryListener.DEFAULT_Listener : listener;
@@ -409,7 +428,7 @@ public class SQLParserUtil {
             List<SQLInfo> sqlInfoList = SQLParserUtil.create(statement, operationTypes, groupBys);
             String sql;
             for (SQLInfo item : sqlInfoList) {
-                sql = item.getSql();
+                sql = item.getFinalSQL();
                 sql = listener.doEvent("CREATE", sql).verifyContent(sql);
                 PreparedStatement preparedStatement = connection.prepareStatement(sql);
                 preparedStatement.execute();
@@ -466,11 +485,8 @@ public class SQLParserUtil {
                     SQLIdentifierExpr value = new SQLIdentifierExpr(condition.getValue());
                     SQLBinaryOpExpr link = new SQLBinaryOpExpr(key, SQLBinaryOperator.valueOf(condition.getOperator().toString()), value);
 
-                    if (null == where) {
-                        result.setWhere(link);
-                    } else {
-                        where.setRight(new SQLBinaryOpExpr(where.getRight(), SQLBinaryOperator.valueOf(condition.getLeftOperator().toString()), link));
-                    }
+                    result.setWhere(null == where ? link : new SQLBinaryOpExpr(where, SQLBinaryOperator.valueOf(condition.getLeftOperator().toString()), link));
+
                     break;
                 case GROUP_BY:
                     GroupByContent groupBy = (GroupByContent) contentItem;
@@ -501,6 +517,19 @@ public class SQLParserUtil {
         }
         return result;
 
+    }
+
+    static SQLInfo buildFinalSQL(String sqlStr, Map<String, Object> params) {
+        StringUtil.StripParam stripParam = StringUtil.stripParam("#{", "}", sqlStr, false);
+        String sql = stripParam.rebuild("?");
+        Map<String, Object> resultParam = Collections.EMPTY_MAP;
+        if (CollectionUtil.isNotEmpty(stripParam.getParam())) {
+            resultParam = new LinkedHashMap<>();
+            for (String paramItem : stripParam.getParam().keySet()) {
+                resultParam.put(paramItem, params.get(paramItem));
+            }
+        }
+        return new SQLInfo().setFinalSQL(sql).setParam(resultParam);
     }
 
     public interface SQLParserFactoryListener {
@@ -540,8 +569,31 @@ public class SQLParserUtil {
     }
 
     public interface DataIterator<T> {
-        default T next(Map<String, Object> data, String operationName, String groupName, Object params) {
-            return (T) data;
+
+        /***
+         *  判断是否执行当前SQL
+         * @param operationName 分组类型1
+         * @param groupName 分组类型2
+         * @param sql 执行SQL
+         * @param params 参数
+         * @return
+         */
+        default boolean isExecute(String operationName, String groupName, String sql, Object params) {
+            return true;
+        }
+
+        /***
+         *
+         *  结果集迭代器
+         *
+         * @param rowData 行数据
+         * @param operationName 分组类型1
+         * @param groupName 分组类型2
+         * @param params 执行参数
+         * @return
+         */
+        default T next(Map<String, Object> rowData, String operationName, String groupName, Object params) {
+            return (T) rowData;
         }
     }
 
@@ -566,11 +618,11 @@ public class SQLParserUtil {
                 "  PRIMARY KEY (`id`)," +
                 "  KEY `ids_tcb_company_id` (`company_id`) USING BTREE COMMENT '企业id索引'" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='企业商务关系表';", new String[]{"day", "mon", "year"}, new String[]{"A", "B", "C", "D",});
-        System.out.println(sqlInfo.getSql());
+        System.out.println(sqlInfo.getFinalSQL());
 
         for (SQLInfo item : sqlInfos) {
             System.out.println("########################");
-            System.out.println(item.getSql());
+            System.out.println(item.getFinalSQL());
             System.out.println("########################");
         }
 

@@ -28,7 +28,7 @@ public class SQLParserUtilTest {
 
         SQLInfo sqlInfo = SQLParserUtil.selectByChooseTable(conn, "SELECT sum(age)x,id FROM test14 WHERE a=#{aa} and b=${aa} group by user", "day", true, CollectionUtil.mapBuilder().append("aa", "99").build());
 
-        System.out.println(sqlInfo.getSql());
+        System.out.println(sqlInfo.getFinalSQL());
 //        SQLParserFactory.create(sql1, new String[]{"day", "mon", "year"}, new String[]{"company", "department", "user"});
 
         final AtomicInteger count = new AtomicInteger(0);
@@ -42,7 +42,7 @@ public class SQLParserUtilTest {
 //        String sql2 = "SELECT sum(age)x,id FROM test14 where a=11 and b=1 and c=11 or a=12 and a between 1 and 2 order by id";
         String sql2 = "SELECT * FROM test14 order by id";
 
-        List<List<Integer>> result = SQLParserUtil.doSelect(
+        Map<String, List<Integer>> result = SQLParserUtil.doSelect(
                 conn,
                 sql2,
                 new MeatdataInfo[]{
@@ -64,7 +64,6 @@ public class SQLParserUtilTest {
                 },
                 null,
                 new SQLParserUtil.DataIterator<Integer>() {
-
                     @Override
                     public Integer next(Map<String, Object> data, String a, String b, Object params) {
                         Object result = data.get("age");
@@ -86,7 +85,7 @@ public class SQLParserUtilTest {
 
             List<SQLInfo> sqlInfoList = SQLParserUtil.create(sql, new String[]{"day", "mon", "year"}, new String[]{"company", "department", "user"});
             for (SQLInfo item : sqlInfoList) {
-                PreparedStatement preparedStatement = connection.prepareStatement(item.getSql());
+                PreparedStatement preparedStatement = connection.prepareStatement(item.getFinalSQL());
                 preparedStatement.execute();
                 preparedStatement.close();
             }
