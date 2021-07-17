@@ -83,6 +83,7 @@ public class HttpClientUtil {
 			OutputStream out = new DataOutputStream(con.getOutputStream());
 			for (Body.BodyItem item : body.getBodyItems()) {
 				out.write(separate);
+				out.write(item.getHead().getBytes("UTF-8"));
 				item.writeBody(out);
 				out.write(separate);
 			}
