@@ -11,6 +11,8 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -49,6 +51,10 @@ public class HttpClientUtil {
 	}
 
 	public ByteArrayOutputStream sendFile(String url, String fileName, InputStream inputStream, Map<String, String> header) throws Exception {
+		return fromData(url, new Body().append(new Body.BodyItem.FileBodyItem("file", fileName, inputStream)), header);
+	}
+
+	public ByteArrayOutputStream fromData(String url, Body body, Map<String, String> header) throws Exception {
 		ByteArrayOutputStream result = new ByteArrayOutputStream();
 		URL urlObj = new URL(url);
 		boolean isHttps = url.toLowerCase().contains("https:");
@@ -72,26 +78,20 @@ public class HttpClientUtil {
 			}
 			String BOUNDARY = "----------" + System.currentTimeMillis();
 			con.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
-			StringBuilder sb = new StringBuilder();
-			sb.append("--");
-			sb.append(BOUNDARY);
-			sb.append("\r\n");
-			sb.append("Content-Disposition: form-data;name=\"file\";filename=\"" + fileName + "\"\r\n");
-			sb.append("Content-Type:application/octet-stream\r\n\r\n");
-			byte[] head = sb.toString().getBytes("utf-8");
+
+			byte[] separate = ("\r\n--" + BOUNDARY + "--\r\n").getBytes("utf-8");
 			OutputStream out = new DataOutputStream(con.getOutputStream());
-			out.write(head);
-			int bytes = 0;
-			byte[] bufferOut = new byte[1024];
-			while ((bytes = inputStream.read(bufferOut)) != -1) {
-				out.write(bufferOut, 0, bytes);
+			for (Body.BodyItem item : body.getBodyItems()) {
+				out.write(separate);
+				item.writeBody(out);
+				out.write(separate);
 			}
-			inputStream.close();
-			byte[] foot = ("\r\n--" + BOUNDARY + "--\r\n").getBytes("utf-8");
-			out.write(foot);
+
 			out.flush();
 			out.close();
 
+			int bytes = 0;
+			byte[] bufferOut = new byte[1024];
 			in = con.getInputStream();
 			while ((bytes = in.read(bufferOut)) != -1) {
 				result.write(bufferOut, 0, bytes);
@@ -344,5 +344,127 @@ public class HttpClientUtil {
 			}
 		});
 	}
+
+	public static class Body implements Serializable {
+		private volatile List<BodyItem> bodyItems = new ArrayList<>();
+
+		public Body append(BodyItem item) {
+//			if (null == this.list) {
+//				synchronized (Body.class) {
+//					if (null == this.list) {
+//						this.list = new ArrayList<>();
+//					}
+//				}
+//			}
+			bodyItems.add(item);
+			return this;
+		}
+
+		public Body append(String fieldName, String nickName, Object value, BodyItem.BodyItemType type) {
+			this.append(BodyItem.BodyItemType.FILE == type ? new BodyItem.FileBodyItem(fieldName, nickName, (InputStream) value) : new BodyItem.TextBodyItem(fieldName, (String) value));
+			return this;
+		}
+
+		public static abstract class BodyItem<T> implements Serializable {
+			private static final long serialVersionUID = -2449963715563826850L;
+			public enum BodyItemType{
+				TEXT, FILE;
+			}
+			private final BodyItemType type;
+			private String fieldName;
+			private T value;
+
+			public BodyItem(BodyItemType type, String fieldName, T value) {
+				this.type = type;
+				this.fieldName = fieldName;
+				this.value = value;
+			}
+
+			public abstract String getHead() throws IOException;
+			public abstract void writeBody(OutputStream out) throws IOException;
+
+			public static class FileBodyItem extends BodyItem<InputStream> {
+				private static final long serialVersionUID = -8503425365672381515L;
+
+				private String fileName;
+
+				public FileBodyItem(String fileName, String fieldName, InputStream value) {
+					super(BodyItemType.FILE, fileName, value);
+					this.fileName = fieldName;
+				}
+
+				@Override
+				public String getHead() throws IOException {
+					return "Content-Disposition: form-data;name=\"" + getFileName() + "\";filename=\"" + getFileName() + "\"\r\n" +
+							"Content-Type:application/octet-stream\r\n\r\n";
+				}
+
+				@Override
+				public void writeBody(OutputStream out) throws IOException {
+					int bytes = 0;
+					byte[] bufferOut = new byte[1024];
+					while ((bytes = getValue().read(bufferOut)) != -1) {
+						out.write(bufferOut, 0, bytes);
+					}
+					getValue().close();
+				}
+
+				public String getFileName() {
+					return fileName;
+				}
+
+				public void setFileName(String fileName) {
+					this.fileName = fileName;
+				}
+			}
+
+			public static class TextBodyItem extends BodyItem<String> {
+				private static final long serialVersionUID = 7671901585936781934L;
+
+				public TextBodyItem(String name, String value) {
+					super(BodyItemType.TEXT, name, value);
+				}
+
+				@Override
+				public String getHead() throws IOException {
+					return "Content-Disposition: form-data;name=\"" + getFieldName() + "\"\r\n\r\n";
+				}
+
+				@Override
+				public void writeBody(OutputStream out) throws IOException {
+					out.write(getValue().getBytes("UTF-8"));
+				}
+			}
+
+			public BodyItemType getType() {
+				return type;
+			}
+
+			public String getFieldName() {
+				return fieldName;
+			}
+
+			public void setFieldName(String fieldName) {
+				this.fieldName = fieldName;
+			}
+
+			public T getValue() {
+				return value;
+			}
+
+			public void setValue(T value) {
+				this.value = value;
+			}
+		}
+
+		public List<BodyItem> getBodyItems() {
+			return bodyItems;
+		}
+
+		public void setBodyItems(List<BodyItem> bodyItems) {
+			this.bodyItems = bodyItems;
+		}
+	}
+
 
 }
