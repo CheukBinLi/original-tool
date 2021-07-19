@@ -2,6 +2,8 @@ package com.github.cheukbinli.original.common.util.net;
 
 import com.github.cheukbinli.original.common.util.conver.CollectionUtil;
 import com.github.cheukbinli.original.common.util.conver.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -18,8 +20,20 @@ import java.util.Map.Entry;
 
 public class HttpClientUtil {
 
+	private final static Logger LOG = LoggerFactory.getLogger(HttpClientUtil.class);
+
 	public static enum RequestMethod {
 		POST, DELETE, PUT, GET, HEAD, Options
+	}
+
+	public byte[] LINK_BREAK;
+
+	{
+		try {
+			LINK_BREAK = "\r\n".getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 
 	protected HttpClientUtil() {
@@ -52,6 +66,59 @@ public class HttpClientUtil {
 
 	public ByteArrayOutputStream sendFile(String url, String fileName, InputStream inputStream, Map<String, String> header) throws Exception {
 		return fromData(url, new Body().append(new Body.BodyItem.FileBodyItem("file", fileName, inputStream)), header);
+//		ByteArrayOutputStream result = new ByteArrayOutputStream();
+//		URL urlObj = new URL(url);
+//		boolean isHttps = url.toLowerCase().contains("https:");
+//		HttpURLConnection con = null;
+//		InputStream in;
+//		try {
+//			if (isHttps)
+//				con = (HttpsURLConnection) urlObj.openConnection();
+//			else
+//				con = (HttpURLConnection) urlObj.openConnection();
+//			con.setRequestMethod("POST");
+//			con.setDoInput(true);
+//			con.setDoOutput(true);
+//			con.setUseCaches(false);
+//			con.setRequestProperty("Connection", "Keep-Alive");
+//			con.setRequestProperty("Charset", "UTF-8");
+//			if (null != header) {
+//				for (Entry<String, String> item : header.entrySet()) {
+//					con.setRequestProperty(item.getKey(), item.getValue());
+//				}
+//			}
+//			String BOUNDARY = "----------" + System.currentTimeMillis();
+//			con.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
+//			StringBuilder sb = new StringBuilder();
+//			sb.append("--");
+//			sb.append(BOUNDARY);
+//			sb.append("\r\n");
+//			sb.append("Content-Disposition: form-data;name=\"file\";filename=\"" + fileName + "\"\r\n");
+//			sb.append("Content-Type:application/octet-stream\r\n\r\n");
+//			byte[] head = sb.toString().getBytes("utf-8");
+//			OutputStream out = new DataOutputStream(con.getOutputStream());
+//			out.write(head);
+//			int bytes = 0;
+//			byte[] bufferOut = new byte[1024];
+//			while ((bytes = inputStream.read(bufferOut)) != -1) {
+//				out.write(bufferOut, 0, bytes);
+//			}
+//			inputStream.close();
+//			byte[] foot = ("\r\n--" + BOUNDARY + "--\r\n").getBytes("utf-8");
+//			out.write(foot);
+//			out.flush();
+//			out.close();
+//
+//			in = con.getInputStream();
+//			while ((bytes = in.read(bufferOut)) != -1) {
+//				result.write(bufferOut, 0, bytes);
+//			}
+//			in.close();
+//		} finally {
+//			if (null != con)
+//				con.disconnect();
+//		}
+//		return result;
 	}
 
 	public ByteArrayOutputStream fromData(String url, Body body, Map<String, String> header) throws Exception {
@@ -79,13 +146,19 @@ public class HttpClientUtil {
 			String BOUNDARY = "----------" + System.currentTimeMillis();
 			con.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 
-			byte[] separate = ("\r\n--" + BOUNDARY + "--\r\n").getBytes("utf-8");
+			byte[] startSeparate = ("--" + BOUNDARY).getBytes("utf-8");
+			byte[] endSeparate = ("--" + BOUNDARY + "--").getBytes("utf-8");
 			OutputStream out = new DataOutputStream(con.getOutputStream());
 			for (Body.BodyItem item : body.getBodyItems()) {
-				out.write(separate);
+				out.write(startSeparate);
+				out.write(LINK_BREAK);
 				out.write(item.getHead().getBytes("UTF-8"));
+				out.write(LINK_BREAK);
+				out.write(LINK_BREAK);
 				item.writeBody(out);
-				out.write(separate);
+				out.write(LINK_BREAK);
+				out.write(endSeparate);
+				out.write(LINK_BREAK);
 			}
 
 			out.flush();
@@ -390,14 +463,14 @@ public class HttpClientUtil {
 				private String fileName;
 
 				public FileBodyItem(String fileName, String fieldName, InputStream value) {
-					super(BodyItemType.FILE, fileName, value);
-					this.fileName = fieldName;
+					super(BodyItemType.FILE, fieldName, value);
+					this.fileName = fileName;
 				}
 
 				@Override
 				public String getHead() throws IOException {
-					return "Content-Disposition: form-data;name=\"" + getFileName() + "\";filename=\"" + getFileName() + "\"\r\n" +
-							"Content-Type:application/octet-stream\r\n\r\n";
+					return "Content-Disposition: form-data;name=\"" + getFieldName() + "\";filename=\"" + getFileName() + "\"\r\n" +
+							"Content-Type:application/octet-stream";
 				}
 
 				@Override
@@ -428,7 +501,7 @@ public class HttpClientUtil {
 
 				@Override
 				public String getHead() throws IOException {
-					return "Content-Disposition: form-data;name=\"" + getFieldName() + "\"\r\n\r\n";
+					return "Content-Disposition: form-data;name=\"" + getFieldName() + "\"";
 				}
 
 				@Override
@@ -466,6 +539,5 @@ public class HttpClientUtil {
 			this.bodyItems = bodyItems;
 		}
 	}
-
 
 }
