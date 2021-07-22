@@ -225,12 +225,8 @@ public class XmlReaderAll extends DefaultHandler {
                 fieldInfo.getField().set(x, value = fieldInfo.getField().getType().newInstance());
             }
             link.addLast(new Node(qName, fieldInfo.getField(), parent, value, genericity));
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new SAXException(e);
         }
     }
 
