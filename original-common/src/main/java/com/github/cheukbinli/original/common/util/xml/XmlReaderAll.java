@@ -250,36 +250,9 @@ public class XmlReaderAll extends DefaultHandler {
                 return;
 
             node.getField().set(null == node.getObj() ? node.getParent() : node.getObj(), Type.getValue(node.getField().getType(), new String(ch, start, length), null));
-            System.out.println(value);
-            System.out.println();
         } catch (IllegalAccessException e) {
             LOG.error(e.getMessage(), e);
         }
-//        ClassInfo fieldClassInfo = ClassInfo.getClassInfo(node.getField().getType());
-//        if (fieldClassInfo.isAbstract()) {
-//            return;
-//        } else if (fieldClassInfo.isMapOrSetOrCollection()) {
-//            if (fieldClassInfo.isMap()) {
-//                value = new LinkedHashMap<>();
-//            } else if (fieldClassInfo.isSet()) {
-//                value = new LinkedHashMap<>();
-//            } else if (fieldClassInfo.isCollection()) {
-//                value = new ArrayList<>();
-//            }
-//        } else {
-//            fieldInfo.getField().set(x, value = fieldInfo.getField().getType().newInstance());
-//        }
-
-
-//        Object o = link.getLast().getObj();
-//        Field f = node.getField();
-//        try {
-//            f.setAccessible(true);
-//            //            f.set(o, objectFill.getValue(f.getType(), new String(ch, start, length)));
-//            f.set(o, Type.getValue(f.getType(), new String(ch, start, length), null));
-//        } catch (Exception e) {
-//            LOG.error(e.getMessage(), e);
-//        }
     }
 
 }
