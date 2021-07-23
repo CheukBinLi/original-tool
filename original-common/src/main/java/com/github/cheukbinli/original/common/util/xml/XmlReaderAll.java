@@ -79,6 +79,10 @@ public class XmlReaderAll extends DefaultHandler {
         return new XmlReaderAll().padding(bytes, obj);
     }
 
+    public static <T> T paddingModel(byte[] bytes, T obj) throws NoSuchFieldException, SecurityException, ParserConfigurationException, SAXException, IOException, InstantiationException, IllegalAccessException {
+        return new XmlReaderAll().padding(bytes, obj);
+    }
+
     public synchronized <T> T padding(byte[] bytes, Class<T> obj) throws ParserConfigurationException, SAXException, IOException, NoSuchFieldException, SecurityException, InstantiationException, IllegalAccessException {
         return padding(bytes, obj.newInstance());
     }
