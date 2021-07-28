@@ -214,15 +214,12 @@ public class XmlReaderAll extends DefaultHandler {
                         collection = new ArrayList<>();
                     }
                     fieldInfo.getField().set(x, collection);
-                    link.addLast(new Node(qName, fieldInfo.getField(), collection, value, null));
-                    return;
-                } else {
-                    if (fieldClassInfo.isMap()) {
-                        throw new RuntimeException("not support Map.");
-                    } else {
-                        ((Collection) collection).add(value);
-                    }
+                    parent = collection;
+                    genericity = null;
+                } else if (fieldClassInfo.isMap()) {
+                    throw new RuntimeException("not support Map.");
                 }
+                ((Collection) collection).add(value);
             } else if (fieldClassInfo.isBasicOrArrays()) {
 //                fieldInfo.getField().set(x, fieldInfo.getField().getType().newInstance());
             } else {
