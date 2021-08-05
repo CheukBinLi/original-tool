@@ -64,7 +64,7 @@ public class Encryption {
 
     private static final Logger LOG = LoggerFactory.getLogger(Encryption.class);
 
-    private Encryption() {
+    public Encryption() {
         super();
         try {
             MD5 = MessageDigest.getInstance("MD5");
@@ -157,16 +157,24 @@ public class Encryption {
         }
     }
 
+    public void addCipher(String fullKey, String key, boolean isPrivateKey, CipherType cipherType, Cipher value) {
+        CIPHER_MAP.put(fullKey, value);
+    }
+
+    public Cipher getCipher(String fullKey, String key, boolean isPrivateKey, CipherType cipherType) {
+        return CIPHER_MAP.get(fullKey);
+    }
 
     private Cipher getCipher(String key, boolean isPrivateKey, CipherType cipherType) throws IOException, InvalidKeySpecException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         String cacheKey = cipherType.name() + "_" + key;
-        Cipher cipher = CIPHER_MAP.get(cacheKey);
+        Cipher cipher = getCipher(cacheKey, key, isPrivateKey, cipherType);
         if (null == cipher) {
             byte[] buffer = base64Decoder.decodeBuffer(key);
             Key publicKey = isPrivateKey ? keyFactory.generatePrivate(new PKCS8EncodedKeySpec(buffer)) : keyFactory.generatePublic(new X509EncodedKeySpec(buffer));
             cipher = Cipher.getInstance("RSA");
             cipher.init(cipherType.ordinal(), publicKey);
-            CIPHER_MAP.put(cacheKey, cipher);
+//            CIPHER_MAP.put(cacheKey, cipher);
+            addCipher(cacheKey, key, isPrivateKey, cipherType, cipher);
         }
         return cipher;
     }
