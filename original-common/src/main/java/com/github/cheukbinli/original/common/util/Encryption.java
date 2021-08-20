@@ -179,7 +179,7 @@ public class Encryption {
         return cipher;
     }
 //
-//    public static void main(String[] args) throws IOException {
+//      public static void main(String[] args) throws IOException {
 //
 //        String privateKey = "MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAK7yDKZhsL16Gaix\n" +
 //                "5UQRFrigYCbjm8A8q0aCCtUvcc+cUVxUxMEKmfLk8oE2L6q6ux3MW6OZh0a4NG0Y\n" +
