@@ -3,7 +3,6 @@ package com.github.cheukbinli.original.common.util;
 import com.github.cheukbinli.original.common.util.conver.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.BASE64Decoder;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -13,6 +12,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,7 +48,7 @@ public class Encryption {
     final int MAX_ENCRYPT_BLOCK = 117;
     final int MAX_DECRYPT_BLOCK = 128;
 
-    private BASE64Decoder base64Decoder = new BASE64Decoder();
+    private Base64.Decoder base64Decoder = Base64.getMimeDecoder();
 
     private final KeyFactory keyFactory;
 
@@ -169,7 +169,7 @@ public class Encryption {
         String cacheKey = cipherType.name() + "_" + key;
         Cipher cipher = getCipher(cacheKey, key, isPrivateKey, cipherType);
         if (null == cipher) {
-            byte[] buffer = base64Decoder.decodeBuffer(key);
+            byte[] buffer = base64Decoder.decode(key);
             Key publicKey = isPrivateKey ? keyFactory.generatePrivate(new PKCS8EncodedKeySpec(buffer)) : keyFactory.generatePublic(new X509EncodedKeySpec(buffer));
             cipher = Cipher.getInstance("RSA");
             cipher.init(cipherType.ordinal(), publicKey);
