@@ -64,7 +64,7 @@ public class ClassRebuild {
             param = m.getParameterTypes().length > 0 ? "$$" : "";
             superBody = isInterface ? "" : (isVoid(m) ? "" : "return ") + "super." + m.getName() + "(" + param + ");";
             //			methodString = generateMethod(m, null == modifyMethod ? superBody : "try{ " + modifyMethod.appCodeToBefore(m.getName(), param), (superBody = null == (temp = modifyMethod.overrideSuperMethod(m.getName(), param)) ? superBody : temp) + " }finally{" + modifyMethod.appCodeToAfter(m.getName(), param) + "}");
-            methodString = generateMethod(m, null == modifyMethod ? "" : modifyMethod.appCodeToBefore(m.getName(), param), (superBody = null == (temp = null == modifyMethod ? null : modifyMethod.overrideSuperMethod(m.getName(), param, !isVoid(m))) ? superBody : temp), null == modifyMethod ? "" : modifyMethod.appCodeToAfter(m.getName(), param));
+            methodString = generateMethod(m, null == modifyMethod ? "" : modifyMethod.appCodeToBefore(m, m.getName(), param), (superBody = null == (temp = null == modifyMethod ? null : modifyMethod.overrideSuperMethod(m, m.getName(), param)) ? superBody : temp), null == modifyMethod ? "" : modifyMethod.appCodeToAfter(m, m.getName(), param));
             newClass.addMethod(CtNewMethod.make(methodString, newClass));
         }
 //		newClass.writeFile("C:/Users/BIN/Desktop");
@@ -225,11 +225,11 @@ public class ClassRebuild {
          *            方法体里所有的参数代代替码/$1代表每个参数$2为第二个参数.......
          * @return
          */
-        default String appCodeToBefore(String methodName, String paramsTag) {
+        default String appCodeToBefore(CtMethod ctMethod, String methodName, String paramsTag) {
             return "";
         }
 
-        default String overrideSuperMethod(String methodName, String paramsTag, boolean hasReturn) {
+        default String overrideSuperMethod(CtMethod ctMethod, String methodName, String paramsTag) {
             //			return "super." + methodName + "(" + paramsTag + ");";
             return null;
         }
@@ -240,7 +240,7 @@ public class ClassRebuild {
          *            方法体里所有的参数代代替码/$1代表每个参数$2为第二个参数.......
          * @return
          */
-        default String appCodeToAfter(String methodName, String paramsTag) {
+        default String appCodeToAfter(CtMethod ctMethod, String methodName, String paramsTag) {
             return "";
         }
     }
