@@ -179,8 +179,26 @@ public class ClassRebuild {
             return "((Character)" + objectName + ").charValue()";
         } else if (("double").equals(typeName)) {
             return "((Double)" + objectName + ").doubleValue()";
+        } else if (("float").equals(typeName)) {
+            return "((Float)" + objectName + ").floatValue()";
         }
         return String.format("(%s)%s", t.getName(), objectName);
+    }
+
+    public final String defaultValue(CtClass t) {
+        if (null == t)
+            return null;
+        String typeName = t.getSimpleName();
+        if (("void").equals(typeName) || ("Void").equals(typeName))
+            return "";
+        if (("int").equals(typeName) || ("short").equals(typeName) || ("byte").equals(typeName) || ("long").equals(typeName) || ("char").equals(typeName) || ("double").equals(typeName) || ("float").equals(typeName)) {
+            return "0";
+        } else if (("boolean").equals(typeName)) {
+            return "true";
+        }
+//        else if (("Long").equals(typeName)||("Boolean").equals(typeName)||("Double").equals(typeName)||("Float").equals(typeName)) {
+        return "null";
+//        }
     }
 
     public boolean isVoid(CtMethod method) throws NotFoundException {
