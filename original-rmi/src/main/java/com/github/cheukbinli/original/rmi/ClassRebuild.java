@@ -2,6 +2,7 @@ package com.github.cheukbinli.original.rmi;
 
 import com.github.cheukbinli.original.common.util.conver.StringUtil;
 import javassist.*;
+import javassist.bytecode.AccessFlag;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.annotation.StringMemberValue;
 
@@ -27,15 +28,18 @@ public class ClassRebuild {
 
     public String getSuffixName(String nick) {
         if (null != nick)
-            return "$" + nick + suffixName;
+            return "_" + nick + suffixName;
         return suffixName;
     }
 
     public Class<?> build(final Class<?> clazz, ModifyMethod modifyMethod, List<FieldModel> fieldmodels, String suffix) throws Throwable {
-        return build(clazz, modifyMethod, fieldmodels, null, suffix);
+        return build(clazz, modifyMethod, fieldmodels, null, suffix, null);
+    }
+    public Class<?> build(final Class<?> clazz, ModifyMethod modifyMethod, List<FieldModel> fieldmodels, String suffix, ClassLoader classLoader) throws Throwable {
+        return build(clazz, modifyMethod, fieldmodels, null, suffix, classLoader);
     }
 
-    public Class<?> build(final Class<?> clazz, ModifyMethod modifyMethod, List<FieldModel> fieldmodels, String className, String suffix) throws Throwable {
+    public Class<?> build(final Class<?> clazz, ModifyMethod modifyMethod, List<FieldModel> fieldmodels, String className, String suffix, ClassLoader classLoader) throws Throwable {
 
         boolean isInterface = clazz.isInterface();
         final String orginalClassName = (null == className ? clazz.getName() : clazz.getPackage().getName() + "." + className) + getSuffixName(suffix);
@@ -68,7 +72,7 @@ public class ClassRebuild {
             newClass.addMethod(CtNewMethod.make(methodString, newClass));
         }
 //		newClass.writeFile("C:/Users/BIN/Desktop");
-        return newClass.toClass();
+        return null == classLoader ? newClass.toClass() : newClass.toClass(classLoader, null);
     }
 
     private final void addField(final CtClass clazz, List<FieldModel> fields) throws CannotCompileException, NotFoundException {
@@ -88,6 +92,7 @@ public class ClassRebuild {
             filed = String.format("%s %s %s%s", null == (temp = item.modifier) ? "" : temp, item.returnType.getName(), item.name, null == (temp = item.instance) ? ";" : "=" + temp + (temp.endsWith(";") ? "" : ";"));
 
             CtField newField = CtField.make(filed, clazz);
+            newField.setModifiers(AccessFlag.PUBLIC);
             if (null != item.annotations) {
                 for (Entry<Class<?>, List<String>> subItem : item.annotations.entrySet()) {
                     xAnnotation = pool.get(subItem.getKey().getCanonicalName());
@@ -183,6 +188,28 @@ public class ClassRebuild {
             return "((Float)" + objectName + ").floatValue()";
         }
         return String.format("(%s)%s", t.getName(), objectName);
+    }
+
+    public final String convery4CodeByClass(String objectName, Class t) {
+        String name = t.getName();
+        if (name.equals(int.class.getName()) || name.equals(Integer.class.getName())) {
+            return "Integer.valueOf(" + objectName + ")";
+        } else if (name.equals(short.class.getName()) || name.equals(Short.class.getName())) {
+            return "Short.valueOf(" + objectName + ")";
+        } else if (name.equals(double.class.getName()) || name.equals(Double.class.getName())) {
+            return "Double.valueOf(" + objectName + ")";
+        } else if (name.equals(long.class.getName()) || name.equals(Long.class.getName())) {
+            return "Long.valueOf(" + objectName + ")";
+        } else if (name.equals(float.class.getName()) || name.equals(Float.class.getName())) {
+            return "Float.valueOf(" + objectName + ")";
+        } else if (name.equals(byte.class.getName()) || name.equals(Byte.class.getName())) {
+            return "Byte.valueOf(" + objectName + ")";
+        } else if (name.equals(boolean.class.getName()) || name.equals(Boolean.class.getName())) {
+            return "Boolean.valueOf(" + objectName + ")";
+        } else if (name.equals(char.class.getName()) || name.equals(Character.class.getName())) {
+            return "Character.valueOf(" + objectName + ")";
+        }
+        return objectName;
     }
 
     public final String defaultValue(CtClass t) {
