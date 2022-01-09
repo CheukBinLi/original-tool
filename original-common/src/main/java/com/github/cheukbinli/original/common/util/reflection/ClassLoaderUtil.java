@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.nio.file.*;
@@ -32,7 +34,7 @@ public class ClassLoaderUtil {
 
     //    static Method getJarFile;
     static Field ucpField;
-    static Method getLoaderMethod, ensureOpenMethod, getJarFileMethod;
+    static Method getLoaderMethod, setAccessible0Method, ensureOpenMethod, getJarFileMethod;
 
 //    static {
 //        try {
@@ -382,16 +384,21 @@ public class ClassLoaderUtil {
         }
     }
 
-    static Object getUcpObj(URLClassLoader classLoader) throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException {
+    static Object getUcpObj(URLClassLoader classLoader) throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Object ucpObj = null;
         if (null == ucpField) {
             ucpField = URLClassLoader.class.getDeclaredField("ucp");
             ucpField.setAccessible(true);
         }
+        if (null == setAccessible0Method) {
+            setAccessible0Method = AccessibleObject.class.getDeclaredMethod("setAccessible0", boolean.class);
+            setAccessible0Method.setAccessible(true);
+        }
         ucpObj = ucpField.get(classLoader);
         if (null == getLoaderMethod) {
             getLoaderMethod = ucpObj.getClass().getDeclaredMethod("getLoader", int.class);
-            getLoaderMethod.setAccessible(true);
+//            getLoaderMethod.setAccessible(true);
+            setAccessible0Method.invoke(getLoaderMethod,true);
         }
         return ucpObj;
     }
