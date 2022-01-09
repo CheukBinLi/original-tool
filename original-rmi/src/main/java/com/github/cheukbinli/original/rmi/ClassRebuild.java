@@ -35,6 +35,7 @@ public class ClassRebuild {
     public Class<?> build(final Class<?> clazz, ModifyMethod modifyMethod, List<FieldModel> fieldmodels, String suffix) throws Throwable {
         return build(clazz, modifyMethod, fieldmodels, null, suffix, null);
     }
+
     public Class<?> build(final Class<?> clazz, ModifyMethod modifyMethod, List<FieldModel> fieldmodels, String suffix, ClassLoader classLoader) throws Throwable {
         return build(clazz, modifyMethod, fieldmodels, null, suffix, classLoader);
     }
@@ -45,7 +46,12 @@ public class ClassRebuild {
         final String orginalClassName = (null == className ? clazz.getName() : clazz.getPackage().getName() + "." + className) + getSuffixName(suffix);
 
         CtClass orginalClass = pool.get(clazz.getName());
-        CtClass newClass = pool.makeClass(orginalClassName);
+        CtClass newClass = pool.getOrNull(orginalClassName);
+        if (null != newClass) {
+            newClass.defrost();
+            newClass.detach();
+        }
+        newClass = pool.makeClass(orginalClassName);
         newClass.setModifiers(Modifier.PUBLIC);
         addCtConstructor(orginalClass, newClass);
 
