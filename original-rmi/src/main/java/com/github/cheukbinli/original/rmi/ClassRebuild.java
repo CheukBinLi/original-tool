@@ -32,8 +32,8 @@ public class ClassRebuild {
         return suffixName;
     }
 
-    public Class<?> build(final Class<?> clazz, ModifyMethod modifyMethod, List<FieldModel> fieldmodels, String suffix, String paramSuffix) throws Throwable {
-        return build(clazz, modifyMethod, fieldmodels, null, suffix, paramSuffix, null);
+    public Class<?> build(final Class<?> clazz, ModifyMethod modifyMethod, List<FieldModel> fieldmodels, String suffix, String paramPrefix) throws Throwable {
+        return build(clazz, modifyMethod, fieldmodels, null, suffix, paramPrefix, null);
     }
     public Class<?> build(final Class<?> clazz, ModifyMethod modifyMethod, List<FieldModel> fieldmodels, String suffix) throws Throwable {
         return build(clazz, modifyMethod, fieldmodels, null, suffix, null);
@@ -47,7 +47,7 @@ public class ClassRebuild {
         return build(clazz, modifyMethod, fieldmodels, className, suffix, null, classLoader);
     }
 
-    public Class<?> build(final Class<?> clazz, ModifyMethod modifyMethod, List<FieldModel> fieldmodels, String className, String suffix, String paramSuffix, ClassLoader classLoader) throws Throwable {
+    public Class<?> build(final Class<?> clazz, ModifyMethod modifyMethod, List<FieldModel> fieldmodels, String className, String suffix, String paramPrefix, ClassLoader classLoader) throws Throwable {
 
         boolean isInterface = clazz.isInterface();
         final String orginalClassName = (null == className ? clazz.getName() : clazz.getPackage().getName() + "." + className) + getSuffixName(suffix);
@@ -78,22 +78,10 @@ public class ClassRebuild {
             if (Modifier.isStatic(m.getModifiers()) || Modifier.isPrivate(m.getModifiers()) || Modifier.isFinal(m.getModifiers()) || Modifier.isNative(m.getModifiers())) {
                 continue;
             }
-            CtClass[] paramsClass = null;
-            if (!StringUtil.isBlank(paramSuffix) && null != (paramsClass = m.getParameterTypes())) {
-
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0, len = paramsClass.length; i < len; i++) {
-                    sb.append(",").append(paramsClass[i].getName()).append(paramSuffix + i);
-                }
-                param = sb.length() > 0 ? sb.substring(1) : "";
-
-            } else {
-                param = m.getParameterTypes().length > 0 ? "$$" : "";
-            }
-
+            param = m.getParameterTypes().length > 0 ? "$$" : "";
             superBody = isInterface ? "" : (isVoid(m) ? "" : "return ") + "super." + m.getName() + "(" + param + ");";
             //			methodString = generateMethod(m, null == modifyMethod ? superBody : "try{ " + modifyMethod.appCodeToBefore(m.getName(), param), (superBody = null == (temp = modifyMethod.overrideSuperMethod(m.getName(), param)) ? superBody : temp) + " }finally{" + modifyMethod.appCodeToAfter(m.getName(), param) + "}");
-            methodString = generateMethod(m, null == modifyMethod ? "" : modifyMethod.appCodeToBefore(m, m.getName(), param), (superBody = null == (temp = null == modifyMethod ? null : modifyMethod.overrideSuperMethod(m, m.getName(), param)) ? superBody : temp), null == modifyMethod ? "" : modifyMethod.appCodeToAfter(m, m.getName(), param));
+            methodString = generateMethod(m, null == modifyMethod ? "" : modifyMethod.appCodeToBefore(m, m.getName(), param), (superBody = null == (temp = null == modifyMethod ? null : modifyMethod.overrideSuperMethod(m, m.getName(), param)) ? superBody : temp), null == modifyMethod ? "" : modifyMethod.appCodeToAfter(m, m.getName(), param), paramPrefix);
             newClass.addMethod(CtNewMethod.make(methodString, newClass));
         }
 //		newClass.writeFile("C:/Users/BIN/Desktop");
@@ -151,12 +139,17 @@ public class ClassRebuild {
     }
 
     private String generateMethod(CtMethod m, String before, String overrideSuper, String after) throws NotFoundException {
+        return generateMethod(m, before, overrideSuper, after, null);
+    }
+
+    private String generateMethod(CtMethod m, String before, String overrideSuper, String after, String prefix) throws NotFoundException {
         StringBuilder sb = new StringBuilder();
         sb.append("public ").append(m.getReturnType().getName()).append(" ").append(m.getName()).append("(");
         CtClass[] params = m.getParameterTypes();
+        prefix = StringUtil.isBlank(prefix, "p_");
         if (null != params)
             for (int i = 0, len = params.length; i < len; i++) {
-                sb.append(params[i].getName()).append(" p_" + i);
+                sb.append(params[i].getName()).append(" ").append(prefix + i);
                 if (i + 1 < len)
                     sb.append(",");
             }
