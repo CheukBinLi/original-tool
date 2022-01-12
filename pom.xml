@@ -7,7 +7,7 @@
     <groupId>com.github.cheukbinli</groupId>
     <artifactId>original-tool</artifactId>
     <!--    <version>${version.prefix}-${version.suffix}</version>-->
-    <version>1.0.0.3.7-RELEASE</version>
+    <version>1.0.0.3.8-RELEASE</version>
     <packaging>pom</packaging>
     <name>original-tool</name>
     <url>https://github.com/CheukBinLi/original-tool</url>
@@ -35,25 +35,25 @@
     </scm>
 
     <distributionManagement>
-<!--        <snapshotRepository>-->
-<!--            <id>ossrh</id>-->
-<!--            <url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
-<!--        </snapshotRepository>-->
-<!--        <repository>-->
-<!--            <id>ossrh</id>-->
-<!--            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>-->
-<!--        </repository>-->
-
-        <repository>
-            <id>nexus-releases</id>
-            <name>Nexus Releases Respository</name>
-            <url>https://nexus.uddun.com/repository/releases</url>
-        </repository>
         <snapshotRepository>
-            <id>nexus-snapshots</id>
-            <name>Nexus Snapshots Repository</name>
-            <url>https://nexus.uddun.com/repository/snapshots</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+
+<!--        <repository>-->
+<!--            <id>nexus-releases</id>-->
+<!--            <name>Nexus Releases Respository</name>-->
+<!--            <url>https://nexus.uddun.com/repository/releases</url>-->
+<!--        </repository>-->
+<!--        <snapshotRepository>-->
+<!--            <id>nexus-snapshots</id>-->
+<!--            <name>Nexus Snapshots Repository</name>-->
+<!--            <url>https://nexus.uddun.com/repository/snapshots</url>-->
+<!--        </snapshotRepository>-->
     </distributionManagement>
 
     <build>
@@ -135,6 +135,9 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
                         <version>${plugin.org.apache.maven.plugins.maven-gpg-plugin.version}</version>
+                        <configuration>
+                            <skip>false</skip>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -183,9 +186,9 @@
         <module>original-qrcode</module>
         <module>original-rmi</module>
         <module>original-spring-plugin</module>
-        <module>original-sql-parser</module>
-        <!--        <module>original-oauth</module>-->
-<!--         <module>original-oauth-web</module>-->
+<!--        <module>original-sql-parser</module>-->
+<!--                <module>original-oauth</module>
+         <module>original-oauth-web</module>-->
 <!--        <module>original-spring-boot-starter</module>-->
     </modules>
 
