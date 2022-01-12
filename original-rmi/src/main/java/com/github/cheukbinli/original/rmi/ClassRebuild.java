@@ -183,49 +183,82 @@ public class ClassRebuild {
     }
 
     public final String convery4CodeByCtClass(String objectName, CtClass t) {
-        if (null == t)
+        return convery4CodeByName(objectName, t.getSimpleName(), t.getName());
+    }
+
+    public final String convery4CodeByCtClass(String objectName, Class t) {
+        return convery4CodeByName(objectName, t.getSimpleName(), t.getName());
+    }
+//    public final String convery4CodeByCtClass(String objectName, CtClass t) {
+//        if (null == t)
+//            return null;
+//        String typeName = t.getSimpleName();
+//        if (("void").equals(typeName))
+//            return objectName;
+//        if (("int").equals(typeName))
+//            return "((java.lang.Integer)" + objectName + ").intValue()";
+//        else if (("boolean").equals(typeName)) {
+//            return "((java.lang.Boolean)" + objectName + ").booleanValue()";
+//        } else if (("short").equals(typeName)) {
+//            return "((java.lang.Short)" + objectName + ").shortValue()";
+//        } else if (("byte").equals(typeName)) {
+//            return "((java.lang.Byte)" + objectName + ").byteValue()";
+//        } else if (("long").equals(typeName)) {
+//            return "((java.lang.Long)" + objectName + ").longValue()";
+//        } else if (("char").equals(typeName)) {
+//            return "((java.lang.Character)" + objectName + ").charValue()";
+//        } else if (("double").equals(typeName)) {
+//            return "((java.lang.Double)" + objectName + ").doubleValue()";
+//        } else if (("float").equals(typeName)) {
+//            return "((java.lang.Float)" + objectName + ").floatValue()";
+//        }
+//        return String.format("(%s)%s", t.getName(), objectName);
+//    }
+
+    public final String convery4CodeByName(String objectName, String simpleName, String fullName) {
+        if (StringUtil.isBlank(simpleName))
             return null;
-        String typeName = t.getSimpleName();
+        String typeName = simpleName;
         if (("void").equals(typeName))
             return objectName;
         if (("int").equals(typeName))
-            return "((Integer)" + objectName + ").intValue()";
+            return "((java.lang.Integer)" + objectName + ").intValue()";
         else if (("boolean").equals(typeName)) {
-            return "((Boolean)" + objectName + ").booleanValue()";
+            return "((java.lang.Boolean)" + objectName + ").booleanValue()";
         } else if (("short").equals(typeName)) {
-            return "((Short)" + objectName + ").shortValue()";
+            return "((java.lang.Short)" + objectName + ").shortValue()";
         } else if (("byte").equals(typeName)) {
-            return "((Byte)" + objectName + ").byteValue()";
+            return "((java.lang.Byte)" + objectName + ").byteValue()";
         } else if (("long").equals(typeName)) {
-            return "((Long)" + objectName + ").longValue()";
+            return "((java.lang.Long)" + objectName + ").longValue()";
         } else if (("char").equals(typeName)) {
-            return "((Character)" + objectName + ").charValue()";
+            return "((java.lang.Character)" + objectName + ").charValue()";
         } else if (("double").equals(typeName)) {
-            return "((Double)" + objectName + ").doubleValue()";
+            return "((java.lang.Double)" + objectName + ").doubleValue()";
         } else if (("float").equals(typeName)) {
-            return "((Float)" + objectName + ").floatValue()";
+            return "((java.lang.Float)" + objectName + ").floatValue()";
         }
-        return String.format("(%s)%s", t.getName(), objectName);
+        return String.format("(%s)%s", StringUtil.isBlank(fullName, simpleName), objectName);
     }
 
     public final String convery4CodeByClass(String objectName, Class t) {
         String name = t.getName();
         if (name.equals(int.class.getName()) || name.equals(Integer.class.getName())) {
-            return "Integer.valueOf(" + objectName + ")";
+            return "java.lang.Integer.valueOf(" + objectName + ")";
         } else if (name.equals(short.class.getName()) || name.equals(Short.class.getName())) {
-            return "Short.valueOf(" + objectName + ")";
+            return "java.lang.Short.valueOf(" + objectName + ")";
         } else if (name.equals(double.class.getName()) || name.equals(Double.class.getName())) {
-            return "Double.valueOf(" + objectName + ")";
+            return "java.lang.Double.valueOf(" + objectName + ")";
         } else if (name.equals(long.class.getName()) || name.equals(Long.class.getName())) {
-            return "Long.valueOf(" + objectName + ")";
+            return "java.lang.Long.valueOf(" + objectName + ")";
         } else if (name.equals(float.class.getName()) || name.equals(Float.class.getName())) {
-            return "Float.valueOf(" + objectName + ")";
+            return "java.lang.Float.valueOf(" + objectName + ")";
         } else if (name.equals(byte.class.getName()) || name.equals(Byte.class.getName())) {
-            return "Byte.valueOf(" + objectName + ")";
+            return "java.lang.Byte.valueOf(" + objectName + ")";
         } else if (name.equals(boolean.class.getName()) || name.equals(Boolean.class.getName())) {
-            return "Boolean.valueOf(" + objectName + ")";
+            return "java.lang.Boolean.valueOf(" + objectName + ")";
         } else if (name.equals(char.class.getName()) || name.equals(Character.class.getName())) {
-            return "Character.valueOf(" + objectName + ")";
+            return "java.lang.Character.valueOf(" + objectName + ")";
         }
         return objectName;
     }
