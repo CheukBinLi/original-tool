@@ -20,7 +20,7 @@
         <org.slf4j.slf4j-api.version>1.7.30</org.slf4j.slf4j-api.version>
 
         <!--rmi-->
-        <org.springframework.version>5.2.7.RELEASE</org.springframework.version>
+        <org.springframework.version>5.2.20.RELEASE</org.springframework.version>
         <io.netty.netty-all.version>4.1.50.Final</io.netty.netty-all.version>
         <org.javassist.javassist.version>3.27.0-GA</org.javassist.javassist.version>
 
